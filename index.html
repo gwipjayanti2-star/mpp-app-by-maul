@@ -3,216 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MPP Apps By Maul</title>
+    <title>MPP Apps Professional</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e3a8a">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Konfigurasi Tema Tailwind (Dark Navy & White) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        navy: {
+                            50: '#f0f4f8',
+                            100: '#d9e2ec',
+                            500: '#334e68',
+                            700: '#243b53',
+                            800: '#102a43',
+                            900: '#0a192f', // Dark Navy Utama
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .sidebar-active { background-color: #1e40af; border-left: 4px solid #60a5fa; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* Hide scrollbar for neatness */
+        body { background-color: #f8fafc; color: #1e293b; }
+        
+        /* Sidebar Styling */
+        .sidebar-active { 
+            background-color: #ffffff1a; /* Putih transparan */
+            border-left: 4px solid #ffffff; 
+            font-weight: 600;
+        }
+        .sidebar-item { transition: all 0.2s ease-in-out; border-left: 4px solid transparent; }
+        .sidebar-item:hover:not(.sidebar-active) { background-color: #ffffff0d; border-left-color: #94a3b8; }
+        
+        /* Custom Scrollbar Elegant */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Loader */
+        .loader-ring { 
+            border: 3px solid #f3f3f3; 
+            border-top: 3px solid #0a192f; 
+            border-radius: 50%; 
+            width: 36px; height: 36px; 
+            animation: spin 1s linear infinite; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Sync Button Animation */
+        .sync-spin { animation: spin 1s linear infinite; }
+        
+        /* Radio Button / Chip Styling untuk Rekap Absen */
+        .chip-radio:checked + label {
+            background-color: #0a192f;
+            color: white;
+            border-color: #0a192f;
+        }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden text-gray-800">
+<body class="flex h-screen overflow-hidden antialiased">
 
     <!-- Sidebar -->
-    <aside class="w-64 bg-blue-900 text-white flex flex-col transition-all duration-300 md:relative absolute z-50 h-full transform -translate-x-full md:translate-x-0" id="sidebar">
-        <div class="p-5 flex items-center justify-between border-b border-blue-800">
-            <h1 class="text-xl font-bold tracking-wider flex items-center">
-                <i class="fas fa-chart-line mr-2 text-blue-400"></i> MPP Apps
-            </h1>
-            <button class="md:hidden text-gray-300" onclick="toggleSidebar()">
+    <aside class="w-64 bg-navy-900 text-white flex flex-col transition-transform duration-300 md:relative absolute z-50 h-full transform -translate-x-full md:translate-x-0 shadow-2xl" id="sidebar">
+        <div class="h-20 flex items-center justify-between px-6 border-b border-navy-700/50">
+            <div class="flex items-center gap-3">
+                <img src="https://www.image2url.com/r2/default/files/1788858741704-8f457ccf-603f-40d9-ba13-eb6befdf3a08.png" alt="Logo" class="h-8 w-8 object-contain bg-white rounded p-1">
+                <h1 class="text-lg font-bold tracking-wide">MPP PRO</h1>
+            </div>
+            <button class="md:hidden text-gray-400 hover:text-white" onclick="toggleSidebar()">
                 <i class="fas fa-times text-xl"></i>
             </button>
         </div>
-        <div class="p-4 text-xs text-blue-300 uppercase tracking-wider font-semibold">Menu Utama</div>
-        <nav class="flex-1 px-2 space-y-1">
-            <button onclick="navigate('dashboard')" id="nav-dashboard" class="sidebar-active w-full flex items-center px-4 py-3 text-sm font-medium rounded-md hover:bg-blue-800 transition-colors">
-                <i class="fas fa-home w-6"></i> Dashboard
+
+        <div class="overflow-y-auto flex-1 py-6 px-3 space-y-1">
+            <p class="px-3 text-xs font-semibold text-navy-100 uppercase tracking-widest mb-3 opacity-70">Main Menu</p>
+            
+            <button onclick="navigate('dashboard')" id="nav-dashboard" class="sidebar-item sidebar-active w-full flex items-center px-4 py-3 text-sm rounded-r-lg text-left">
+                <i class="fas fa-th-large w-6 opacity-80"></i> Dashboard
             </button>
-            <button onclick="navigate('attendance')" id="nav-attendance" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-md hover:bg-blue-800 transition-colors">
-                <i class="fas fa-calendar-check w-6"></i> Input Kehadiran
+            
+            <p class="px-3 text-xs font-semibold text-navy-100 uppercase tracking-widest mt-6 mb-3 opacity-70">Input Data</p>
+            
+            <button onclick="navigate('attendance')" id="nav-attendance" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-r-lg text-left">
+                <i class="fas fa-user-check w-6 opacity-80"></i> Kehadiran Harian
             </button>
-            <button onclick="navigate('overtime')" id="nav-overtime" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-md hover:bg-blue-800 transition-colors">
-                <i class="fas fa-clock w-6"></i> Input Lembur
+            <button onclick="navigate('overtime')" id="nav-overtime" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-r-lg text-left">
+                <i class="fas fa-business-time w-6 opacity-80"></i> Lembur Karyawan
             </button>
-            <button onclick="navigate('reports')" id="nav-reports" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-md hover:bg-blue-800 transition-colors">
-                <i class="fas fa-trophy w-6"></i> Rekap & Peringkat
+            <button onclick="navigate('others')" id="nav-others" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-r-lg text-left">
+                <i class="fas fa-boxes w-6 opacity-80"></i> Input Lain-lain
             </button>
-        </nav>
-        <div class="p-4 border-t border-blue-800 text-xs text-blue-400 text-center">
-            By Maul &copy; 2026
+            
+            <p class="px-3 text-xs font-semibold text-navy-100 uppercase tracking-widest mt-6 mb-3 opacity-70">Analisis</p>
+            
+            <button onclick="navigate('reports')" id="nav-reports" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-r-lg text-left">
+                <i class="fas fa-chart-pie w-6 opacity-80"></i> Rekap & Laporan
+            </button>
+        </div>
+        
+        <div class="p-5 border-t border-navy-700/50">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-navy-700 flex items-center justify-center text-xs font-bold text-white border border-navy-500">AD</div>
+                <div class="text-xs">
+                    <p class="font-semibold">Administrator</p>
+                    <p class="text-navy-100 opacity-60">HQ Office</p>
+                </div>
+            </div>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-screen relative w-full overflow-hidden">
+    <main class="flex-1 flex flex-col h-screen relative w-full overflow-hidden bg-slate-50">
         <!-- Topbar -->
-        <header class="bg-white shadow-sm z-10 px-6 py-4 flex items-center justify-between">
+        <header class="bg-white border-b border-gray-200 z-10 px-6 h-20 flex items-center justify-between shadow-sm flex-shrink-0">
             <div class="flex items-center">
-                <button class="md:hidden mr-4 text-gray-500 hover:text-gray-700" onclick="toggleSidebar()">
+                <button class="md:hidden mr-4 text-navy-900 hover:text-navy-700 transition" onclick="toggleSidebar()">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
-                <h2 class="text-xl font-semibold text-gray-800" id="page-title">Dashboard Utama</h2>
+                <h2 class="text-xl font-bold text-navy-900 tracking-tight" id="page-title">Executive Dashboard</h2>
             </div>
             <div class="flex items-center gap-4">
-                <button onclick="loadData()" class="text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium bg-blue-50 px-3 py-1.5 rounded-md">
-                    <i class="fas fa-sync-alt mr-2"></i> Refresh Data
+                <button onclick="loadData(this)" class="group flex items-center gap-2 text-sm font-semibold text-navy-900 bg-white border border-gray-200 shadow-sm hover:bg-gray-50 px-4 py-2 rounded-full transition-all">
+                    <span class="hidden md:inline">Sinkronisasi Data</span>
+                    <img src="https://www.image2url.com/r2/default/files/1788858741704-8f457ccf-603f-40d9-ba13-eb6befdf3a08.png" alt="Sync" class="h-5 w-5 object-contain transition-transform" id="sync-icon">
                 </button>
             </div>
         </header>
 
         <!-- Loading Overlay -->
-        <div id="loading-overlay" class="absolute inset-0 bg-white/80 z-40 flex flex-col items-center justify-center hidden">
-            <div class="loader mb-4"></div>
-            <p class="text-gray-600 font-medium">Memuat data dari database...</p>
+        <div id="loading-overlay" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-40 flex flex-col items-center justify-center hidden">
+            <div class="loader-ring mb-4"></div>
+            <p class="text-navy-900 font-semibold tracking-wide">Menyinkronkan Data...</p>
         </div>
 
         <!-- Content Area -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 pb-20">
+        <div class="flex-1 overflow-y-auto p-6 md:p-8 pb-24">
             
             <!-- VIEW: DASHBOARD -->
-            <div id="view-dashboard" class="space-y-6">
-                <!-- Filters -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-end">
-                    <div class="w-full md:w-auto">
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Periode Cut Off</label>
-                        <select id="dash-periode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" onchange="renderDashboard()">
-                            <!-- Options generated by JS -->
-                        </select>
-                    </div>
-                    <div class="w-full md:w-auto">
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Departemen</label>
-                        <select id="dash-dept" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" onchange="renderDashboard()">
-                            <option value="ALL">Semua Departemen</option>
-                            <option value="DUMPING">DUMPING</option>
-                            <option value="CRUSHER">CRUSHER</option>
-                            <option value="CCP">CCP</option>
-                            <option value="GWIP">GWIP</option>
+            <div id="view-dashboard" class="space-y-8 max-w-7xl mx-auto">
+                
+                <!-- Filter Sederhana -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-4 border-b border-gray-200">
+                    <div class="w-full md:w-64">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Periode Data</label>
+                        <select id="dash-periode" class="w-full bg-white border border-gray-200 text-navy-900 text-sm rounded-lg focus:ring-navy-900 focus:border-navy-900 p-2.5 font-medium shadow-sm transition-all" onchange="renderDashboard()">
+                            <!-- Diisi oleh JS -->
                         </select>
                     </div>
                 </div>
 
-                <!-- KPI Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
-                        <p class="text-sm text-gray-500 font-medium mb-1">Total Karyawan</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="kpi-total-emp">0</h3>
+                <!-- KPI Cards (Mewah & Minimalis) -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-users text-4xl text-navy-900"></i></div>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Karyawan Aktif</p>
+                        <h3 class="text-3xl font-bold text-navy-900" id="kpi-total-emp">0</h3>
                     </div>
-                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
-                        <p class="text-sm text-gray-500 font-medium mb-1">Total Masuk</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="kpi-total-hadir">0</h3>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-check-circle text-4xl text-navy-900"></i></div>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Total Kehadiran</p>
+                        <h3 class="text-3xl font-bold text-navy-900" id="kpi-total-hadir">0</h3>
                     </div>
-                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500">
-                        <p class="text-sm text-gray-500 font-medium mb-1">Total Tidak Hadir</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="kpi-total-absen">0</h3>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-times-circle text-4xl text-red-900"></i></div>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Ketidakhadiran</p>
+                        <h3 class="text-3xl font-bold text-red-600" id="kpi-total-absen">0</h3>
                     </div>
-                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-yellow-500">
-                        <p class="text-sm text-gray-500 font-medium mb-1">Total Jam Lembur</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="kpi-total-ot">0</h3>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500">
-                        <p class="text-sm text-gray-500 font-medium mb-1">Rata-rata Kehadiran</p>
-                        <h3 class="text-2xl font-bold text-gray-800" id="kpi-avg-att">0%</h3>
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-clock text-4xl text-navy-900"></i></div>
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Rasio Kehadiran</p>
+                        <h3 class="text-3xl font-bold text-navy-900" id="kpi-avg-att">0%</h3>
                     </div>
                 </div>
 
-                <!-- Charts Area -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Tren Kehadiran vs Ketidakhadiran (Per Grup)</h3>
-                        <canvas id="chartAttendance" height="250"></canvas>
+                <!-- Charts Area (Hanya yg penting) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-base font-bold text-navy-900 mb-6 flex items-center">
+                            <i class="fas fa-chart-bar mr-2 text-gray-400"></i> Komparasi Kehadiran per Departemen
+                        </h3>
+                        <div class="relative h-64 w-full">
+                            <canvas id="chartAttendance"></canvas>
+                        </div>
                     </div>
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">10 Karyawan Paling Sering Tidak Masuk</h3>
-                        <canvas id="chartWorstAbsence" height="250"></canvas>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                        <h3 class="text-base font-bold text-navy-900 mb-6 flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2 text-red-400"></i> Top 5 Sering Absen
+                        </h3>
+                        <div class="relative h-64 w-full">
+                            <canvas id="chartWorstAbsence"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- VIEW: ATTENDANCE -->
-            <div id="view-attendance" class="hidden space-y-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Input Kehadiran Batch</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                            <input type="date" id="att-date" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Departemen</label>
-                            <select id="att-dept" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" onchange="loadEmployeesForAttendance()">
-                                <option value="">-- Pilih Departemen --</option>
-                                <option value="DUMPING">DUMPING</option>
-                                <option value="CRUSHER">CRUSHER</option>
-                                <option value="CCP">CCP</option>
-                                <option value="GWIP">GWIP</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Grup</label>
-                            <select id="att-group" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" onchange="loadEmployeesForAttendance()">
-                                <option value="">-- Pilih Grup --</option>
-                                <option value="Grup A">Grup A</option>
-                                <option value="Grup B">Grup B</option>
-                                <option value="Grup C">Grup C</option>
-                            </select>
-                        </div>
+            <div id="view-attendance" class="hidden space-y-6 max-w-6xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+                        <h3 class="text-lg font-bold text-navy-900 mb-1">Form Input Kehadiran</h3>
+                        <p class="text-sm text-gray-500">Pilih departemen dan grup untuk mengisi kehadiran massal.</p>
                     </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div>
+                                <label class="block text-sm font-semibold text-navy-900 mb-2">Tanggal</label>
+                                <input type="date" id="att-date" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-navy-900 focus:border-navy-900 transition-colors">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-navy-900 mb-2">Departemen</label>
+                                <select id="att-dept" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-navy-900 focus:border-navy-900 transition-colors" onchange="loadEmployeesForAttendance()">
+                                    <option value="">-- Pilih --</option>
+                                    <option value="DUMPING">DUMPING</option>
+                                    <option value="CRUSHER">CRUSHER</option>
+                                    <option value="CCP">CCP</option>
+                                    <option value="GWIP">GWIP</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-navy-900 mb-2">Grup</label>
+                                <select id="att-group" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-navy-900 focus:border-navy-900 transition-colors" onchange="loadEmployeesForAttendance()">
+                                    <option value="">-- Pilih --</option>
+                                    <option value="Grup A">Grup A</option>
+                                    <option value="Grup B">Grup B</option>
+                                    <option value="Grup C">Grup C</option>
+                                </select>
+                            </div>
+                        </div>
 
-                    <div id="att-employee-list-container" class="hidden">
-                        <div class="flex justify-between items-center bg-gray-100 p-3 rounded-t-lg border border-gray-200">
-                            <span class="font-semibold text-gray-700 text-sm">Daftar Karyawan</span>
-                            <button onclick="setAllAttendance('HADIR')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full hover:bg-green-200 font-medium">Set Semua HADIR</button>
-                        </div>
-                        <div class="border border-t-0 border-gray-200 rounded-b-lg overflow-hidden max-h-96 overflow-y-auto">
-                            <table class="min-w-full divide-y divide-gray-200 text-sm text-left">
-                                <thead class="bg-gray-50 sticky top-0 z-10">
-                                    <tr>
-                                        <th class="px-4 py-2 font-medium text-gray-500">ID</th>
-                                        <th class="px-4 py-2 font-medium text-gray-500">Nama</th>
-                                        <th class="px-4 py-2 font-medium text-gray-500 w-48">Status Kehadiran</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="att-tbody" class="bg-white divide-y divide-gray-200">
-                                    <!-- Populated via JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="mt-4 flex justify-end">
-                            <button onclick="submitAttendance()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-sm font-medium transition-colors">
-                                <i class="fas fa-save mr-2"></i> Simpan Kehadiran
-                            </button>
+                        <div id="att-employee-list-container" class="hidden">
+                            <div class="flex justify-between items-end mb-4">
+                                <h4 class="font-bold text-navy-900">Daftar Karyawan</h4>
+                                <button onclick="setAllAttendance('HADIR')" class="text-xs bg-navy-900 text-white px-4 py-2 rounded-md hover:bg-navy-800 font-semibold shadow-sm transition-colors">Set Semua HADIR</button>
+                            </div>
+                            <div class="border border-gray-200 rounded-xl overflow-hidden">
+                                <div class="max-h-[400px] overflow-y-auto custom-scrollbar">
+                                    <table class="min-w-full divide-y divide-gray-200 text-sm text-left">
+                                        <thead class="bg-gray-50 sticky top-0 z-10 shadow-sm">
+                                            <tr>
+                                                <th class="px-6 py-3 font-bold text-navy-900 uppercase tracking-wider text-xs">ID</th>
+                                                <th class="px-6 py-3 font-bold text-navy-900 uppercase tracking-wider text-xs">Nama Lengkap</th>
+                                                <th class="px-6 py-3 font-bold text-navy-900 uppercase tracking-wider text-xs w-56">Status (Tanpa Izin/Cuti)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="att-tbody" class="bg-white divide-y divide-gray-100">
+                                            <!-- Diisi oleh JS -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex justify-end">
+                                <button onclick="submitAttendance()" class="bg-navy-900 hover:bg-navy-800 text-white px-8 py-3 rounded-xl shadow-md font-bold transition-all transform hover:-translate-y-0.5">
+                                    <i class="fas fa-check-circle mr-2"></i> Simpan Data Kehadiran
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- VIEW: OVERTIME -->
-            <div id="view-overtime" class="hidden space-y-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Input Lembur Karyawan</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div id="view-overtime" class="hidden space-y-6 max-w-6xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+                        <h3 class="text-lg font-bold text-navy-900 mb-1">Form Input Lembur</h3>
+                        <p class="text-sm text-gray-500">Pilih karyawan yang melaksanakan kerja lembur.</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-navy-900 mb-2">Tanggal</label>
+                                <input type="date" id="ot-date" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-navy-900 focus:border-navy-900 transition-colors">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-navy-900 mb-2">Departemen</label>
+                                <select id="ot-dept" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-navy-900 focus:border-navy-900 transition-colors" onchange="loadEmployeesForOvertime()">
+                                    <option value="">-- Pilih --</option>
+                                    <option value="DUMPING">DUMPING</option>
+                                    <option value="CRUSHER">CRUSHER</option>
+                                    <option value="CCP">CCP</option>
+                                    <option value="GWIP">GWIP</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-navy-900 mb-2">Grup</label>
+                                <select id="ot-group" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-navy-900 focus:border-navy-900 transition-colors" onchange="loadEmployeesForOvertime()">
+                                    <option value="">-- Pilih --</option>
+                                    <option value="Grup A">Grup A</option>
+                                    <option value="Grup B">Grup B</option>
+                                    <option value="Grup C">Grup C</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-navy-900 mb-2">Durasi (Jam)</label>
+                                <select id="ot-hours" class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-navy-900 focus:border-navy-900 transition-colors">
+                                    <option value="3.5">3.5 Jam (Setengah hari)</option>
+                                    <option value="7.5">7.5 Jam (Longshift)</option>
+                                    <option value="10">10 Jam (Lembur Libur)</option>
+                                    <option value="14">14 Jam (Lembur Full Libur)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <label class="block text-sm font-semibold text-navy-900 mb-2">Keterangan Pekerjaan</label>
+                            <input type="text" id="ot-remarks" placeholder="Contoh: Pencapaian target produksi area pit" class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-navy-900 focus:border-navy-900 transition-colors">
+                        </div>
+
+                        <div id="ot-employee-list-container" class="hidden">
+                            <div class="flex items-center mb-4">
+                                <input type="checkbox" id="ot-select-all" class="w-5 h-5 text-navy-900 bg-gray-100 border-gray-300 rounded focus:ring-navy-900" onchange="toggleAllOvertime()">
+                                <label for="ot-select-all" class="ml-3 font-bold text-navy-900 text-sm cursor-pointer select-none">Pilih Semua Karyawan dalam Grup</label>
+                            </div>
+                            <div class="border border-gray-200 rounded-xl bg-gray-50/30 p-4 max-h-[350px] overflow-y-auto custom-scrollbar">
+                                <div id="ot-checkbox-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <!-- Diisi oleh JS -->
+                                </div>
+                            </div>
+                            <div class="mt-6 flex justify-end">
+                                <button onclick="submitOvertime()" class="bg-navy-900 hover:bg-navy-800 text-white px-8 py-3 rounded-xl shadow-md font-bold transition-all transform hover:-translate-y-0.5">
+                                    <i class="fas fa-save mr-2"></i> Simpan Data Lembur
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: OTHERS -->
+            <div id="view-others" class="hidden space-y-6 max-w-6xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-navy-50 mb-6">
+                        <i class="fas fa-tools text-3xl text-navy-900"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-navy-900 mb-2">Modul Dalam Pengembangan</h3>
+                    <p class="text-gray-500 max-w-md mx-auto">Menu "Input Lain-lain" (seperti mutasi, SP, penilaian) sedang disiapkan untuk pembaruan sistem berikutnya.</p>
+                </div>
+            </div>
+
+            <!-- VIEW: REPORTS -->
+            <div id="view-reports" class="hidden space-y-6 max-w-7xl mx-auto">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold text-navy-900 mb-4 border-b border-gray-100 pb-4">Filter Laporan</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                            <input type="date" id="ot-date" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Periode</label>
+                            <select id="rep-periode" class="w-full bg-gray-50 border border-gray-200 text-navy-900 text-sm rounded-lg focus:ring-navy-900 focus:border-navy-900 p-2.5 font-medium transition-colors" onchange="renderReports()"></select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Departemen</label>
-                            <select id="ot-dept" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" onchange="loadEmployeesForOvertime()">
-                                <option value="">-- Pilih Departemen --</option>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Tipe Rekap</label>
+                            <select id="rep-type" class="w-full bg-gray-50 border border-gray-200 text-navy-900 text-sm rounded-lg focus:ring-navy-900 focus:border-navy-900 p-2.5 font-medium transition-colors" onchange="handleReportTypeChange()">
+                                <option value="lengkap">Rekap Kehadiran Keseluruhan</option>
+                                <option value="absen">Analisis Ketidakhadiran</option>
+                                <option value="lembur">Rekapitulasi Jam Lembur</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Departemen</label>
+                            <select id="rep-dept" class="w-full bg-gray-50 border border-gray-200 text-navy-900 text-sm rounded-lg focus:ring-navy-900 focus:border-navy-900 p-2.5 font-medium transition-colors" onchange="renderReports()">
+                                <option value="ALL">Semua Departemen</option>
                                 <option value="DUMPING">DUMPING</option>
                                 <option value="CRUSHER">CRUSHER</option>
                                 <option value="CCP">CCP</option>
@@ -220,81 +380,44 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Grup</label>
-                            <select id="ot-group" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" onchange="loadEmployeesForOvertime()">
-                                <option value="">-- Pilih Grup --</option>
+                            <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Grup</label>
+                            <select id="rep-group" class="w-full bg-gray-50 border border-gray-200 text-navy-900 text-sm rounded-lg focus:ring-navy-900 focus:border-navy-900 p-2.5 font-medium transition-colors" onchange="renderReports()">
+                                <option value="ALL">Semua Grup</option>
                                 <option value="Grup A">Grup A</option>
                                 <option value="Grup B">Grup B</option>
                                 <option value="Grup C">Grup C</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Durasi Lembur (Jam)</label>
-                            <select id="ot-hours" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                                <option value="3.5">3.5 Jam (Setengah hari kerja)</option>
-                                <option value="7.5">7.5 Jam (Longshift hari biasa)</option>
-                                <option value="10">10 Jam (Lembur 5 Jam hari libur)</option>
-                                <option value="14">14 Jam (Lembur 8 jam hari libur)</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan / Pekerjaan</label>
-                        <input type="text" id="ot-remarks" placeholder="Contoh: Perbaikan unit / Target produksi" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
                     </div>
 
-                    <div id="ot-employee-list-container" class="hidden">
-                        <div class="flex items-center bg-gray-100 p-3 rounded-t-lg border border-gray-200">
-                            <input type="checkbox" id="ot-select-all" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 ml-2" onchange="toggleAllOvertime()">
-                            <label for="ot-select-all" class="ml-2 font-semibold text-gray-700 text-sm cursor-pointer">Pilih Semua Karyawan</label>
-                        </div>
-                        <div class="border border-t-0 border-gray-200 rounded-b-lg overflow-hidden max-h-96 overflow-y-auto p-4 bg-white">
-                            <div id="ot-checkbox-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                <!-- Populated via JS -->
+                    <!-- Filter Khusus Ketidakhadiran -->
+                    <div id="rep-absence-filters" class="mt-6 pt-4 border-t border-gray-100 hidden">
+                        <label class="block text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">Tampilkan Berdasarkan Alasan</label>
+                        <div class="flex flex-wrap gap-3">
+                            <div class="relative">
+                                <input class="hidden chip-radio" type="radio" name="absType" id="abs-all" value="ALL" checked onchange="renderReports()">
+                                <label for="abs-all" class="cursor-pointer inline-block px-4 py-1.5 bg-gray-100 text-gray-600 text-sm font-semibold rounded-full border border-gray-200 hover:bg-gray-200 transition-colors">Semua Alasan</label>
+                            </div>
+                            <div class="relative">
+                                <input class="hidden chip-radio" type="radio" name="absType" id="abs-alpha" value="ALPHA" onchange="renderReports()">
+                                <label for="abs-alpha" class="cursor-pointer inline-block px-4 py-1.5 bg-gray-100 text-gray-600 text-sm font-semibold rounded-full border border-gray-200 hover:bg-gray-200 transition-colors">Hanya ALPHA</label>
+                            </div>
+                            <div class="relative">
+                                <input class="hidden chip-radio" type="radio" name="absType" id="abs-sakit" value="SAKIT" onchange="renderReports()">
+                                <label for="abs-sakit" class="cursor-pointer inline-block px-4 py-1.5 bg-gray-100 text-gray-600 text-sm font-semibold rounded-full border border-gray-200 hover:bg-gray-200 transition-colors">Hanya SAKIT</label>
                             </div>
                         </div>
-                        <div class="mt-4 flex justify-end">
-                            <button onclick="submitOvertime()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg shadow-sm font-medium transition-colors">
-                                <i class="fas fa-save mr-2"></i> Simpan Lembur
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- VIEW: REPORTS -->
-            <div id="view-reports" class="hidden space-y-6">
-                <!-- Recap Filters -->
-                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-end">
-                     <div class="w-full md:w-auto">
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Periode Cut Off</label>
-                        <select id="rep-periode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" onchange="renderReports()">
-                        </select>
-                    </div>
-                    <div class="w-full md:w-auto">
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Tipe Rekap</label>
-                        <select id="rep-type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" onchange="renderReports()">
-                            <option value="absen">Ranking Ketidakhadiran</option>
-                            <option value="lembur">Rekap Jam Lembur</option>
-                            <option value="lengkap">Rekap Keseluruhan (Detail)</option>
-                        </select>
-                    </div>
-                    <div class="w-full md:w-auto flex-1 flex justify-end">
-                         <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center">
-                            <i class="fas fa-file-excel mr-2"></i> Export Data
-                        </button>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 text-sm text-left">
                             <thead class="bg-gray-50" id="rep-thead">
-                                <!-- Generated by JS based on selection -->
+                                <!-- Diisi oleh JS -->
                             </thead>
-                            <tbody id="rep-tbody" class="bg-white divide-y divide-gray-200">
-                                <!-- Generated by JS -->
+                            <tbody id="rep-tbody" class="bg-white divide-y divide-gray-100">
+                                <!-- Diisi oleh JS -->
                             </tbody>
                         </table>
                     </div>
@@ -304,45 +427,34 @@
         </div>
     </main>
 
-    <!-- Modal Message -->
-    <div id="msg-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full mx-4 transform scale-95 transition-transform duration-300" id="msg-modal-content">
-            <div class="p-6 text-center">
-                <div id="msg-icon" class="text-4xl mb-4"></div>
-                <h3 id="msg-title" class="text-lg font-bold text-gray-800 mb-2"></h3>
-                <p id="msg-desc" class="text-gray-600 text-sm mb-6"></p>
-                <button onclick="closeModal()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700">Tutup</button>
+    <!-- Modal Pesan Elegan -->
+    <div id="msg-modal" class="fixed inset-0 bg-navy-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 transform scale-95 transition-transform duration-300 overflow-hidden" id="msg-modal-content">
+            <div class="p-8 text-center relative">
+                <div id="msg-icon" class="text-5xl mb-4"></div>
+                <h3 id="msg-title" class="text-xl font-bold text-navy-900 mb-2 tracking-tight"></h3>
+                <p id="msg-desc" class="text-gray-500 text-sm mb-8 leading-relaxed"></p>
+                <button onclick="closeModal()" class="w-full bg-navy-900 text-white py-3 rounded-xl font-bold hover:bg-navy-800 transition-colors shadow-md">Tutup Pesan</button>
             </div>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // GANTI URL DI BAWAH INI DENGAN URL WEB APP GAS ANDA
+        // KONFIGURASI URL APPS SCRIPT
         // ==========================================
         const GAS_URL = "https://script.google.com/macros/s/AKfycbynLsxoOqWfEehRi4KAIGjt70fDNDzNf4NZliXFlgLTHc1FVsEQyT8EUf1HwEQmTUsVaQ/exec"; 
         
-        // App State
-        let db = {
-            employees: [],
-            attendance: [],
-            overtime: []
-        };
-        
+        let db = { employees: [], attendance: [], overtime: [] };
         let charts = {};
 
-        // Utilities
         const getEl = id => document.getElementById(id);
         
-        // Initial setup
         document.addEventListener('DOMContentLoaded', () => {
-            // Set default dates
             getEl('att-date').valueAsDate = new Date();
             getEl('ot-date').valueAsDate = new Date();
-            
             generatePeriodeOptions();
             
-            // Check if we need to load data
             if(db.employees.length === 0){
                 loadData();
             } else {
@@ -350,13 +462,52 @@
             }
         });
 
-        async function loadData() {
+        // Generate Periode Format: "Bulan Tahun" (Sistem internal 16 bln sblm - 15 bln ini)
+        function generatePeriodeOptions() {
+            const selects = [getEl('dash-periode'), getEl('rep-periode')];
+            let today = new Date();
+            let optionsHTML = '';
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+            for(let i=0; i<6; i++) {
+                // Tentukan bulan patokan (mundur i bulan)
+                let targetDate = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                let targetMonth = targetDate.getMonth();
+                let targetYear = targetDate.getFullYear();
+
+                let prevMonthDate = new Date(targetYear, targetMonth - 1, 1);
+                let prevMonth = prevMonthDate.getMonth();
+                let prevYear = prevMonthDate.getFullYear();
+
+                // Format String (Misal: September 2026 (16 Ags - 15 Sep))
+                let shortPrev = monthNames[prevMonth].substring(0,3);
+                let shortCurr = monthNames[targetMonth].substring(0,3);
+                let label = `${monthNames[targetMonth]} ${targetYear} (16 ${shortPrev} - 15 ${shortCurr})`;
+
+                // Nilai value untuk filter logic (YYYY-MM-DD_YYYY-MM-DD)
+                let startDate = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-16`;
+                let endDate = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-15`;
+                let val = `${startDate}_${endDate}`;
+
+                let isSelected = (i === 0) ? 'selected' : ''; // Default bulan ini
+                
+                optionsHTML += `<option value="${val}" ${isSelected}>${label}</option>`;
+            }
+            selects.forEach(sel => sel.innerHTML = optionsHTML);
+        }
+
+        async function loadData(btnElement = null) {
             if(!GAS_URL || GAS_URL.includes("XXXXXXXXXX")) {
-                showModal('error', 'Konfigurasi URL', 'URL Apps Script belum disetting. Silahkan cek kode index.html.');
+                showModal('error', 'Konfigurasi URL', 'URL Apps Script belum disetting.');
                 return;
             }
             
             getEl('loading-overlay').classList.remove('hidden');
+            
+            // Animasi icon sync jika ditrigger dari tombol
+            let syncIcon = getEl('sync-icon');
+            if(syncIcon) syncIcon.classList.add('sync-spin');
+
             try {
                 const response = await fetch(`${GAS_URL}?action=getAllData`);
                 const result = await response.json();
@@ -366,46 +517,44 @@
                 db.overtime = result.overtime || [];
                 
                 renderDashboard();
-                if(getEl('view-reports').classList.contains('hidden') === false) renderReports();
+                if(!getEl('view-reports').classList.contains('hidden')) renderReports();
+                
+                if(btnElement) {
+                    showModal('success', 'Sinkronisasi Selesai', 'Data berhasil diperbarui dari server utama.');
+                }
             } catch (error) {
                 console.error("Fetch Error:", error);
-                showModal('error', 'Koneksi Gagal', 'Gagal memuat data dari database. Pastikan URL Apps Script benar.');
+                showModal('error', 'Koneksi Terputus', 'Gagal memuat data dari database. Periksa koneksi internet Anda.');
             } finally {
                 getEl('loading-overlay').classList.add('hidden');
+                if(syncIcon) syncIcon.classList.remove('sync-spin');
             }
         }
 
         function toggleSidebar() {
             const sidebar = getEl('sidebar');
-            if (sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.remove('-translate-x-full');
-            } else {
-                sidebar.classList.add('-translate-x-full');
-            }
+            sidebar.classList.toggle('-translate-x-full');
         }
 
         function navigate(page) {
-            // Hide all views
-            ['dashboard', 'attendance', 'overtime', 'reports'].forEach(v => {
+            ['dashboard', 'attendance', 'overtime', 'others', 'reports'].forEach(v => {
                 getEl(`view-${v}`).classList.add('hidden');
                 getEl(`nav-${v}`).classList.remove('sidebar-active');
             });
             
-            // Show selected
             getEl(`view-${page}`).classList.remove('hidden');
             getEl(`nav-${page}`).classList.add('sidebar-active');
             
             const titles = {
-                'dashboard': 'Dashboard Utama',
-                'attendance': 'Input Kehadiran Batch',
-                'overtime': 'Input Lembur Karyawan',
-                'reports': 'Rekap & Peringkat'
+                'dashboard': 'Executive Dashboard',
+                'attendance': 'Input Kehadiran',
+                'overtime': 'Input Lembur',
+                'others': 'Modul Lainnya',
+                'reports': 'Pusat Laporan & Analisis'
             };
             getEl('page-title').innerText = titles[page];
             
-            if(window.innerWidth < 768) {
-                toggleSidebar(); // Close sidebar on mobile after clicking
-            }
+            if(window.innerWidth < 768) toggleSidebar();
 
             if(page === 'dashboard') renderDashboard();
             if(page === 'reports') renderReports();
@@ -418,16 +567,15 @@
             if(type === 'success') {
                 icon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
             } else if(type === 'error') {
-                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+                icon.innerHTML = '<i class="fas fa-exclamation-circle text-red-500"></i>';
             } else {
-                icon.innerHTML = '<i class="fas fa-info-circle text-blue-500"></i>';
+                icon.innerHTML = '<i class="fas fa-info-circle text-navy-500"></i>';
             }
             
             getEl('msg-title').innerText = title;
             getEl('msg-desc').innerText = desc;
             
             modal.classList.remove('hidden');
-            // Small delay to allow display:block to apply before animating opacity
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
                 getEl('msg-modal-content').classList.remove('scale-95');
@@ -438,35 +586,7 @@
             const modal = getEl('msg-modal');
             modal.classList.add('opacity-0');
             getEl('msg-modal-content').classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        // Generate cut-off periods: 16 Previous Month to 15 Current Month
-        function generatePeriodeOptions() {
-            const selects = [getEl('dash-periode'), getEl('rep-periode')];
-            let today = new Date();
-            let optionsHTML = '';
-            
-            // Generate last 6 periods
-            for(let i=0; i<6; i++) {
-                let d = new Date(today.getFullYear(), today.getMonth() - i, 15);
-                let start = new Date(d.getFullYear(), d.getMonth() - 1, 16);
-                let end = new Date(d.getFullYear(), d.getMonth(), 15);
-                
-                let val = `${start.toISOString().split('T')[0]}_${end.toISOString().split('T')[0]}`;
-                let label = `Periode: 16 ${start.toLocaleString('id-ID',{month:'short'})} - 15 ${end.toLocaleString('id-ID',{month:'short', year:'numeric'})}`;
-                
-                // Select current active period
-                let isSelected = '';
-                if(i===0 && today.getDate() <= 15) isSelected = 'selected';
-                else if(i===1 && today.getDate() > 15) isSelected = 'selected'; // wait, if today > 15, current period is 16 cur - 15 next. We need to handle this.
-                
-                optionsHTML += `<option value="${val}">${label}</option>`;
-            }
-            
-            selects.forEach(sel => sel.innerHTML = optionsHTML);
+            setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
         function getActiveDateRange(selectId) {
@@ -484,72 +604,79 @@
             return d >= start && d <= end;
         }
 
+        /* --- DASHBOARD LOGIC --- */
         function renderDashboard() {
             if(db.employees.length === 0) return;
             
             const range = getActiveDateRange('dash-periode');
-            const deptFilter = getEl('dash-dept').value;
             
-            // Filter Data
-            const activeEmps = db.employees.filter(e => e.Status === "Aktif" && (deptFilter === 'ALL' || e.Departemen === deptFilter));
+            const activeEmps = db.employees.filter(e => e.Status === "Aktif");
             const empIds = new Set(activeEmps.map(e => String(e["Employee ID"])));
             
             const periodAtt = db.attendance.filter(a => isDateInRange(a.Tanggal, range.start, range.end) && empIds.has(String(a["Employee ID"])));
-            const periodOt = db.overtime.filter(o => isDateInRange(o.Tanggal, range.start, range.end) && empIds.has(String(o["Employee ID"])));
 
-            // Calculate KPIs
             let totalMasuk = periodAtt.filter(a => a.Status === 'HADIR').length;
-            let totalAbsen = periodAtt.filter(a => ['ALPHA', 'SAKIT', 'IZIN'].includes(a.Status)).length;
-            let totalOtHours = periodOt.reduce((sum, o) => sum + parseFloat(o["Jam Lembur"] || 0), 0);
+            let totalAbsen = periodAtt.filter(a => ['ALPHA', 'SAKIT'].includes(a.Status)).length;
             
             getEl('kpi-total-emp').innerText = activeEmps.length;
             getEl('kpi-total-hadir').innerText = totalMasuk;
             getEl('kpi-total-absen').innerText = totalAbsen;
-            getEl('kpi-total-ot').innerText = totalOtHours.toFixed(1) + ' Jam';
             
             let avg = periodAtt.length > 0 ? ((totalMasuk / (totalMasuk + totalAbsen)) * 100).toFixed(1) : 0;
             getEl('kpi-avg-att').innerText = avg + '%';
 
-            // Prepare Data for Charts
             drawCharts(activeEmps, periodAtt);
         }
 
         function drawCharts(employees, attendance) {
-            // Group Stats
-            let groupStats = {};
+            // Chart 1: Dept Stats
+            let deptStats = {};
             attendance.forEach(a => {
-                let g = a.Departemen + ' ' + a.Grup;
-                if(!groupStats[g]) groupStats[g] = { hadir: 0, absen: 0 };
-                if(a.Status === 'HADIR') groupStats[g].hadir++;
-                else if(['ALPHA', 'SAKIT', 'IZIN'].includes(a.Status)) groupStats[g].absen++;
+                let d = a.Departemen;
+                if(!d) return;
+                if(!deptStats[d]) deptStats[d] = { hadir: 0, absen: 0 };
+                if(a.Status === 'HADIR') deptStats[d].hadir++;
+                else if(['ALPHA', 'SAKIT'].includes(a.Status)) deptStats[d].absen++;
             });
 
-            let labels = Object.keys(groupStats);
-            let dataHadir = labels.map(l => groupStats[l].hadir);
-            let dataAbsen = labels.map(l => groupStats[l].absen);
+            let labels = Object.keys(deptStats);
+            let dataHadir = labels.map(l => deptStats[l].hadir);
+            let dataAbsen = labels.map(l => deptStats[l].absen);
 
             if(charts.attendance) charts.attendance.destroy();
             const ctxAtt = getEl('chartAttendance').getContext('2d');
+            
+            // Konfigurasi warna Chart untuk tema Navy
+            Chart.defaults.color = '#64748b';
+            Chart.defaults.font.family = '"Plus Jakarta Sans", sans-serif';
+
             charts.attendance = new Chart(ctxAtt, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Hadir', data: dataHadir, backgroundColor: '#3b82f6' },
-                        { label: 'Tidak Hadir', data: dataAbsen, backgroundColor: '#ef4444' }
+                        { label: 'Kehadiran', data: dataHadir, backgroundColor: '#0a192f', borderRadius: 4 },
+                        { label: 'Ketidakhadiran', data: dataAbsen, backgroundColor: '#94a3b8', borderRadius: 4 }
                     ]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                options: { 
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { 
+                        y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
+                        x: { grid: { display: false } }
+                    } 
+                }
             });
 
-            // Worst Absence
+            // Chart 2: Worst Absence
             let empAbsence = {};
-            attendance.filter(a => ['ALPHA', 'SAKIT', 'IZIN'].includes(a.Status)).forEach(a => {
+            attendance.filter(a => ['ALPHA', 'SAKIT'].includes(a.Status)).forEach(a => {
                 let name = a.Nama;
                 empAbsence[name] = (empAbsence[name] || 0) + 1;
             });
             
-            let sortedWorst = Object.keys(empAbsence).sort((a,b) => empAbsence[b] - empAbsence[a]).slice(0, 10);
+            let sortedWorst = Object.keys(empAbsence).sort((a,b) => empAbsence[b] - empAbsence[a]).slice(0, 5);
             let worstData = sortedWorst.map(name => empAbsence[name]);
 
             if(charts.worst) charts.worst.destroy();
@@ -559,16 +686,24 @@
                 data: {
                     labels: sortedWorst,
                     datasets: [{
-                        label: 'Hari Tidak Hadir',
+                        label: 'Frekuensi (Hari)',
                         data: worstData,
-                        backgroundColor: '#f59e0b',
+                        backgroundColor: '#dc2626', // Red
                         borderRadius: 4
                     }]
                 },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true } } }
+                options: { 
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        x: { beginAtZero: true, grid: { borderDash: [4, 4] } },
+                        y: { grid: { display: false } }
+                    } 
+                }
             });
         }
 
+        /* --- ATTENDANCE LOGIC --- */
         function loadEmployeesForAttendance() {
             const dept = getEl('att-dept').value;
             const group = getEl('att-group').value;
@@ -583,23 +718,22 @@
             let filtered = db.employees.filter(e => e.Departemen === dept && e.Grup === group && e.Status === "Aktif");
             
             if(filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" class="px-4 py-8 text-center text-gray-500">Tidak ada karyawan di grup ini.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-12 text-center text-gray-500 font-medium">Tidak ada karyawan aktif ditemukan di kriteria ini.</td></tr>';
             } else {
                 let html = '';
                 filtered.forEach(e => {
                     const selectId = `att-status-${e["Employee ID"]}`;
+                    // Sesuai instruksi: Izin & Cuti dihilangkan
                     html += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2 whitespace-nowrap">${e["Employee ID"]}</td>
-                            <td class="px-4 py-2 font-medium">${e["Nama"]}</td>
-                            <td class="px-4 py-2">
-                                <select id="${selectId}" data-id="${e["Employee ID"]}" data-nama="${e["Nama"]}" class="att-status-select bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 block w-full p-2">
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-3 whitespace-nowrap text-gray-500 font-mono">${e["Employee ID"]}</td>
+                            <td class="px-6 py-3 font-semibold text-navy-900">${e["Nama"]}</td>
+                            <td class="px-6 py-2">
+                                <select id="${selectId}" data-id="${e["Employee ID"]}" data-nama="${e["Nama"]}" class="att-status-select w-full bg-white border border-gray-200 text-navy-900 text-sm rounded-md focus:ring-navy-900 focus:border-navy-900 p-2 shadow-sm">
                                     <option value="HADIR">HADIR</option>
                                     <option value="ALPHA">ALPHA</option>
                                     <option value="SAKIT">SAKIT</option>
-                                    <option value="IZIN">IZIN</option>
-                                    <option value="CUTI">CUTI</option>
-                                    <option value="OFF">OFF</option>
+                                    <option value="OFF">OFF / REST</option>
                                 </select>
                             </td>
                         </tr>
@@ -621,7 +755,7 @@
             const dept = getEl('att-dept').value;
             const group = getEl('att-group').value;
             
-            if(!date) return showModal('info', 'Peringatan', 'Harap pilih tanggal terlebih dahulu.');
+            if(!date) return showModal('info', 'Tanggal Kosong', 'Harap lengkapi tanggal kehadiran.');
             
             const selects = document.querySelectorAll('.att-status-select');
             if(selects.length === 0) return;
@@ -646,17 +780,17 @@
                 });
                 const res = await response.json();
                 if(res.status === 'success') {
-                    showModal('success', 'Berhasil', `${payloadData.length} data kehadiran berhasil disimpan.`);
-                    // Append local db to reflect changes instantly without full reload
+                    showModal('success', 'Penyimpanan Berhasil', `${payloadData.length} data kehadiran telah terekam ke sistem.`);
                     payloadData.forEach(p => db.attendance.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Departemen": p.dept, "Grup": p.grup, "Status": p.status}));
                 } else throw new Error(res.message);
             } catch (err) {
-                showModal('error', 'Gagal Menyimpan', err.message || 'Terjadi kesalahan jaringan.');
+                showModal('error', 'Gagal', err.message || 'Koneksi ke database gagal.');
             } finally {
                 getEl('loading-overlay').classList.add('hidden');
             }
         }
 
+        /* --- OVERTIME LOGIC --- */
         function loadEmployeesForOvertime() {
             const dept = getEl('ot-dept').value;
             const group = getEl('ot-group').value;
@@ -671,16 +805,16 @@
             let filtered = db.employees.filter(e => e.Departemen === dept && e.Grup === group && e.Status === "Aktif");
             
             if(filtered.length === 0) {
-                grid.innerHTML = '<div class="col-span-full py-4 text-center text-gray-500">Tidak ada karyawan.</div>';
+                grid.innerHTML = '<div class="col-span-full py-8 text-center text-gray-500 font-medium">Tidak ada karyawan.</div>';
             } else {
                 let html = '';
                 filtered.forEach(e => {
                     html += `
-                        <label class="flex items-start space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                            <input type="checkbox" value="${e["Employee ID"]}" data-nama="${e["Nama"]}" class="ot-emp-check w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 mt-0.5">
+                        <label class="flex items-center p-3 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-navy-500 transition-colors shadow-sm">
+                            <input type="checkbox" value="${e["Employee ID"]}" data-nama="${e["Nama"]}" class="ot-emp-check w-5 h-5 text-navy-900 border-gray-300 rounded focus:ring-navy-900 mr-3">
                             <div class="flex flex-col">
-                                <span class="font-medium text-gray-800 text-sm">${e["Nama"]}</span>
-                                <span class="text-xs text-gray-500">${e["Employee ID"]}</span>
+                                <span class="font-bold text-navy-900 text-sm">${e["Nama"]}</span>
+                                <span class="text-xs text-gray-400 font-mono">${e["Employee ID"]}</span>
                             </div>
                         </label>
                     `;
@@ -703,10 +837,10 @@
             const hours = getEl('ot-hours').value;
             const remarks = getEl('ot-remarks').value;
             
-            if(!date || !remarks) return showModal('info', 'Peringatan', 'Harap isi Tanggal dan Keterangan Lembur.');
+            if(!date || !remarks) return showModal('info', 'Form Tidak Lengkap', 'Pastikan Tanggal dan Keterangan Pekerjaan sudah diisi.');
             
             const checks = document.querySelectorAll('.ot-emp-check:checked');
-            if(checks.length === 0) return showModal('info', 'Peringatan', 'Pilih minimal satu karyawan untuk dilemburkan.');
+            if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan untuk direkam lemburnya.');
 
             let payloadData = [];
             checks.forEach(chk => {
@@ -729,18 +863,30 @@
                 });
                 const res = await response.json();
                 if(res.status === 'success') {
-                    showModal('success', 'Berhasil', `${payloadData.length} data lembur berhasil disimpan.`);
+                    showModal('success', 'Lembur Disimpan', `${payloadData.length} data lembur berhasil direkam.`);
                     payloadData.forEach(p => db.overtime.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Departemen": p.dept, "Grup": p.grup, "Jam Lembur": p.jamLembur, "Keterangan": p.keterangan}));
-                    // Reset form
                     getEl('ot-remarks').value = '';
                     checks.forEach(chk => chk.checked = false);
                     getEl('ot-select-all').checked = false;
                 } else throw new Error(res.message);
             } catch (err) {
-                showModal('error', 'Gagal Menyimpan', err.message || 'Terjadi kesalahan jaringan.');
+                showModal('error', 'Gagal', err.message || 'Koneksi ke database gagal.');
             } finally {
                 getEl('loading-overlay').classList.add('hidden');
             }
+        }
+
+        /* --- REPORTS LOGIC --- */
+        function handleReportTypeChange() {
+            const type = getEl('rep-type').value;
+            const filterAbsence = getEl('rep-absence-filters');
+            
+            if(type === 'absen') {
+                filterAbsence.classList.remove('hidden');
+            } else {
+                filterAbsence.classList.add('hidden');
+            }
+            renderReports();
         }
 
         function renderReports() {
@@ -748,18 +894,25 @@
             
             const range = getActiveDateRange('rep-periode');
             const type = getEl('rep-type').value;
+            const deptFilter = getEl('rep-dept').value;
+            const groupFilter = getEl('rep-group').value;
+            
             const thead = getEl('rep-thead');
             const tbody = getEl('rep-tbody');
             
             let htmlHead = '';
             let htmlBody = '';
             
-            // Generate basic stats per employee
             let stats = {};
-            db.employees.filter(e => e.Status === "Aktif").forEach(e => {
+            db.employees.filter(e => {
+                let match = e.Status === "Aktif";
+                if(deptFilter !== 'ALL' && e.Departemen !== deptFilter) match = false;
+                if(groupFilter !== 'ALL' && e.Grup !== groupFilter) match = false;
+                return match;
+            }).forEach(e => {
                 stats[e["Employee ID"]] = {
                     id: e["Employee ID"], name: e["Nama"], dept: e["Departemen"], grup: e["Grup"],
-                    hadir: 0, absen: 0, jamLembur: 0
+                    hadir: 0, absenAlpha: 0, absenSakit: 0, jamLembur: 0
                 };
             });
             
@@ -767,7 +920,8 @@
                 let s = stats[String(a["Employee ID"])];
                 if(s) {
                     if(a.Status === 'HADIR') s.hadir++;
-                    else if(['ALPHA', 'SAKIT', 'IZIN'].includes(a.Status)) s.absen++;
+                    else if(a.Status === 'ALPHA') s.absenAlpha++;
+                    else if(a.Status === 'SAKIT') s.absenSakit++;
                 }
             });
             
@@ -779,77 +933,102 @@
             let statsArray = Object.values(stats);
 
             if(type === 'absen') {
+                // Ambil filter spesifik alasan
+                let absFilter = document.querySelector('input[name="absType"]:checked').value;
+                
                 htmlHead = `<tr>
-                    <th class="px-4 py-3 font-semibold text-gray-600">Rank</th>
-                    <th class="px-4 py-3 font-semibold text-gray-600">Nama</th>
-                    <th class="px-4 py-3 font-semibold text-gray-600">Bagian/Grup</th>
-                    <th class="px-4 py-3 font-semibold text-gray-600 text-center">Total Tidak Hadir</th>
-                </tr>`;
-                
-                statsArray.sort((a,b) => b.absen - a.absen); // Descending absen
-                
-                statsArray.filter(s => s.absen > 0).forEach((s, idx) => {
-                    let rankBadge = `${idx + 1}`;
-                    if(idx === 0) rankBadge = '🥇 1';
-                    else if(idx === 1) rankBadge = '🥈 2';
-                    else if(idx === 2) rankBadge = '🥉 3';
-                    
-                    htmlBody += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-bold text-gray-700">${rankBadge}</td>
-                        <td class="px-4 py-3 font-medium text-gray-800"><div class="text-sm">${s.name}</div><div class="text-xs text-gray-500">${s.id}</div></td>
-                        <td class="px-4 py-3"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${s.dept} - ${s.grup}</span></td>
-                        <td class="px-4 py-3 text-center text-red-600 font-bold text-lg">${s.absen} Hari</td>
-                    </tr>`;
-                });
-                
-                if(htmlBody === '') htmlBody = '<tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">Tidak ada data ketidakhadiran di periode ini. Hebat!</td></tr>';
-            } 
-            else if(type === 'lembur') {
-                htmlHead = `<tr>
-                    <th class="px-4 py-3 font-semibold text-gray-600">Rank</th>
-                    <th class="px-4 py-3 font-semibold text-gray-600">Nama</th>
-                    <th class="px-4 py-3 font-semibold text-gray-600 text-center">Total Jam Lembur</th>
-                </tr>`;
-                
-                statsArray.sort((a,b) => b.jamLembur - a.jamLembur); // Descending overtime
-                
-                statsArray.filter(s => s.jamLembur > 0).forEach((s, idx) => {
-                    htmlBody += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 text-gray-500">${idx+1}</td>
-                        <td class="px-4 py-3 font-medium"><div class="text-sm text-gray-800">${s.name}</div><div class="text-xs text-gray-500">${s.dept} - ${s.grup}</div></td>
-                        <td class="px-4 py-3 text-center text-green-600 font-bold">${s.jamLembur} Jam</td>
-                    </tr>`;
-                });
-                
-                if(htmlBody === '') htmlBody = '<tr><td colspan="3" class="px-4 py-6 text-center text-gray-500">Tidak ada lembur di periode ini.</td></tr>';
-            }
-            else { // lengkap
-                htmlHead = `<tr>
-                    <th class="px-4 py-3 font-semibold text-gray-600">ID & Nama</th>
-                    <th class="px-4 py-3 font-semibold text-gray-600">Bagian</th>
-                    <th class="px-4 py-3 font-semibold text-gray-600 text-center">Kehadiran (%)</th>
-                    <th class="px-4 py-3 font-semibold text-gray-600 text-center">Total Lembur</th>
+                    <th class="px-6 py-4 font-bold text-navy-900 tracking-wider text-xs uppercase">Karyawan</th>
+                    <th class="px-6 py-4 font-bold text-navy-900 tracking-wider text-xs uppercase text-center">Unit Kerja</th>
+                    <th class="px-6 py-4 font-bold text-navy-900 tracking-wider text-xs uppercase text-center">Total Absen (Hari)</th>
                 </tr>`;
                 
                 statsArray.forEach(s => {
-                    let totalHariKerja = s.hadir + s.absen;
+                    s.totalAbsenDisplay = 0;
+                    if(absFilter === 'ALL') s.totalAbsenDisplay = s.absenAlpha + s.absenSakit;
+                    else if(absFilter === 'ALPHA') s.totalAbsenDisplay = s.absenAlpha;
+                    else if(absFilter === 'SAKIT') s.totalAbsenDisplay = s.absenSakit;
+                });
+
+                statsArray.sort((a,b) => b.totalAbsenDisplay - a.totalAbsenDisplay); 
+                
+                statsArray.filter(s => s.totalAbsenDisplay > 0).forEach((s) => {
+                    htmlBody += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-navy-900">${s.name}</div>
+                            <div class="text-xs text-gray-500 font-mono">${s.id}</div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200">
+                                ${s.dept} - ${s.grup}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="text-lg font-bold ${absFilter === 'SAKIT' ? 'text-yellow-600' : 'text-red-600'}">${s.totalAbsenDisplay}</span>
+                        </td>
+                    </tr>`;
+                });
+                
+                if(htmlBody === '') htmlBody = '<tr><td colspan="3" class="px-6 py-12 text-center text-gray-500 font-medium">Data bersih. Tidak ada rekam ketidakhadiran di kriteria ini.</td></tr>';
+            } 
+            else if(type === 'lembur') {
+                htmlHead = `<tr>
+                    <th class="px-6 py-4 font-bold text-navy-900 tracking-wider text-xs uppercase">Karyawan</th>
+                    <th class="px-6 py-4 font-bold text-navy-900 tracking-wider text-xs uppercase text-center">Unit Kerja</th>
+                    <th class="px-6 py-4 font-bold text-navy-900 tracking-wider text-xs uppercase text-center">Durasi Lembur (Jam)</th>
+                </tr>`;
+                
+                statsArray.sort((a,b) => b.jamLembur - a.jamLembur);
+                
+                statsArray.filter(s => s.jamLembur > 0).forEach((s) => {
+                    htmlBody += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-navy-900">${s.name}</div>
+                            <div class="text-xs text-gray-500 font-mono">${s.id}</div>
+                        </td>
+                        <td class="px-6 py-4 text-center text-sm text-gray-600">${s.dept} - ${s.grup}</td>
+                        <td class="px-6 py-4 text-center text-navy-900 font-bold text-lg">${s.jamLembur}</td>
+                    </tr>`;
+                });
+                
+                if(htmlBody === '') htmlBody = '<tr><td colspan="3" class="px-6 py-12 text-center text-gray-500 font-medium">Tidak ada rekam lembur di periode ini.</td></tr>';
+            }
+            else { // lengkap
+                htmlHead = `<tr>
+                    <th class="px-6 py-4 font-bold text-navy-900 tracking-wider text-xs uppercase">Karyawan</th>
+                    <th class="px-6 py-4 font-bold text-navy-900 tracking-wider text-xs uppercase">Unit Kerja</th>
+                    <th class="px-6 py-4 font-bold text-navy-900 tracking-wider text-xs uppercase text-center">Rasio Kehadiran</th>
+                    <th class="px-6 py-4 font-bold text-navy-900 tracking-wider text-xs uppercase text-center">Detail (H/A/S)</th>
+                </tr>`;
+                
+                statsArray.forEach(s => {
+                    let totalAbsen = s.absenAlpha + s.absenSakit;
+                    let totalHariKerja = s.hadir + totalAbsen;
                     let persentase = totalHariKerja > 0 ? Math.round((s.hadir / totalHariKerja) * 100) : 0;
-                    let colorCode = persentase < 80 ? 'text-red-500' : (persentase < 95 ? 'text-yellow-500' : 'text-green-500');
+                    
+                    let statusColor = persentase < 80 ? 'text-red-600' : (persentase < 95 ? 'text-yellow-600' : 'text-green-600');
+                    let bgColor = persentase < 80 ? 'bg-red-50' : (persentase < 95 ? 'bg-yellow-50' : 'bg-green-50');
                     
                     htmlBody += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3">
-                            <div class="text-sm font-medium text-gray-800">${s.name}</div>
-                            <div class="text-xs text-gray-500">${s.id}</div>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="font-bold text-navy-900">${s.name}</div>
+                            <div class="text-xs text-gray-400 font-mono">${s.id}</div>
                         </td>
-                        <td class="px-4 py-3 text-sm">${s.dept} - ${s.grup}</td>
-                        <td class="px-4 py-3 text-center">
-                            <div class="font-bold ${colorCode}">${persentase}%</div>
-                            <div class="text-xs text-gray-400">Masuk: ${s.hadir}, Absen: ${s.absen}</div>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-600">${s.dept} - ${s.grup}</td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="inline-flex items-center justify-center px-3 py-1 rounded-lg text-sm font-bold ${statusColor} ${bgColor}">
+                                ${persentase}%
+                            </span>
                         </td>
-                        <td class="px-4 py-3 text-center font-semibold text-gray-700">${s.jamLembur} Jam</td>
+                        <td class="px-6 py-4 text-center text-xs">
+                            <div class="flex justify-center gap-3">
+                                <span title="Hadir" class="font-semibold text-gray-700">H: ${s.hadir}</span>
+                                <span title="Alpha" class="font-semibold text-red-500">A: ${s.absenAlpha}</span>
+                                <span title="Sakit" class="font-semibold text-yellow-600">S: ${s.absenSakit}</span>
+                            </div>
+                        </td>
                     </tr>`;
                 });
             }
@@ -858,14 +1037,6 @@
             tbody.innerHTML = htmlBody;
         }
 
-        // PWA Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('SW registered!', reg);
-                }).catch(err => console.log('SW registration failed', err));
-            });
-        }
     </script>
 </body>
 </html>
