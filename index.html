@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPP Apps By Maul</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .sidebar-active { background-color: #1e40af; border-left: 4px solid #60a5fa; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Hide scrollbar for neatness */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-gray-800">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-blue-900 text-white flex flex-col transition-all duration-300 md:relative absolute z-50 h-full transform -translate-x-full md:translate-x-0" id="sidebar">
+        <div class="p-5 flex items-center justify-between border-b border-blue-800">
+            <h1 class="text-xl font-bold tracking-wider flex items-center">
+                <i class="fas fa-chart-line mr-2 text-blue-400"></i> MPP Apps
+            </h1>
+            <button class="md:hidden text-gray-300" onclick="toggleSidebar()">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="p-4 text-xs text-blue-300 uppercase tracking-wider font-semibold">Menu Utama</div>
+        <nav class="flex-1 px-2 space-y-1">
+            <button onclick="navigate('dashboard')" id="nav-dashboard" class="sidebar-active w-full flex items-center px-4 py-3 text-sm font-medium rounded-md hover:bg-blue-800 transition-colors">
+                <i class="fas fa-home w-6"></i> Dashboard
+            </button>
+            <button onclick="navigate('attendance')" id="nav-attendance" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-md hover:bg-blue-800 transition-colors">
+                <i class="fas fa-calendar-check w-6"></i> Input Kehadiran
+            </button>
+            <button onclick="navigate('overtime')" id="nav-overtime" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-md hover:bg-blue-800 transition-colors">
+                <i class="fas fa-clock w-6"></i> Input Lembur
+            </button>
+            <button onclick="navigate('reports')" id="nav-reports" class="w-full flex items-center px-4 py-3 text-sm font-medium rounded-md hover:bg-blue-800 transition-colors">
+                <i class="fas fa-trophy w-6"></i> Rekap & Peringkat
+            </button>
+        </nav>
+        <div class="p-4 border-t border-blue-800 text-xs text-blue-400 text-center">
+            By Maul &copy; 2026
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen relative w-full overflow-hidden">
+        <!-- Topbar -->
+        <header class="bg-white shadow-sm z-10 px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center">
+                <button class="md:hidden mr-4 text-gray-500 hover:text-gray-700" onclick="toggleSidebar()">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h2 class="text-xl font-semibold text-gray-800" id="page-title">Dashboard Utama</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="loadData()" class="text-blue-600 hover:text-blue-800 flex items-center text-sm font-medium bg-blue-50 px-3 py-1.5 rounded-md">
+                    <i class="fas fa-sync-alt mr-2"></i> Refresh Data
+                </button>
+            </div>
+        </header>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="absolute inset-0 bg-white/80 z-40 flex flex-col items-center justify-center hidden">
+            <div class="loader mb-4"></div>
+            <p class="text-gray-600 font-medium">Memuat data dari database...</p>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 pb-20">
+            
+            <!-- VIEW: DASHBOARD -->
+            <div id="view-dashboard" class="space-y-6">
+                <!-- Filters -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-end">
+                    <div class="w-full md:w-auto">
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Periode Cut Off</label>
+                        <select id="dash-periode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" onchange="renderDashboard()">
+                            <!-- Options generated by JS -->
+                        </select>
+                    </div>
+                    <div class="w-full md:w-auto">
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Departemen</label>
+                        <select id="dash-dept" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" onchange="renderDashboard()">
+                            <option value="ALL">Semua Departemen</option>
+                            <option value="DUMPING">DUMPING</option>
+                            <option value="CRUSHER">CRUSHER</option>
+                            <option value="CCP">CCP</option>
+                            <option value="GWIP">GWIP</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
+                        <p class="text-sm text-gray-500 font-medium mb-1">Total Karyawan</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="kpi-total-emp">0</h3>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
+                        <p class="text-sm text-gray-500 font-medium mb-1">Total Masuk</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="kpi-total-hadir">0</h3>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-red-500">
+                        <p class="text-sm text-gray-500 font-medium mb-1">Total Tidak Hadir</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="kpi-total-absen">0</h3>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-yellow-500">
+                        <p class="text-sm text-gray-500 font-medium mb-1">Total Jam Lembur</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="kpi-total-ot">0</h3>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500">
+                        <p class="text-sm text-gray-500 font-medium mb-1">Rata-rata Kehadiran</p>
+                        <h3 class="text-2xl font-bold text-gray-800" id="kpi-avg-att">0%</h3>
+                    </div>
+                </div>
+
+                <!-- Charts Area -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">Tren Kehadiran vs Ketidakhadiran (Per Grup)</h3>
+                        <canvas id="chartAttendance" height="250"></canvas>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">10 Karyawan Paling Sering Tidak Masuk</h3>
+                        <canvas id="chartWorstAbsence" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: ATTENDANCE -->
+            <div id="view-attendance" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Input Kehadiran Batch</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                            <input type="date" id="att-date" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Departemen</label>
+                            <select id="att-dept" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" onchange="loadEmployeesForAttendance()">
+                                <option value="">-- Pilih Departemen --</option>
+                                <option value="DUMPING">DUMPING</option>
+                                <option value="CRUSHER">CRUSHER</option>
+                                <option value="CCP">CCP</option>
+                                <option value="GWIP">GWIP</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Grup</label>
+                            <select id="att-group" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" onchange="loadEmployeesForAttendance()">
+                                <option value="">-- Pilih Grup --</option>
+                                <option value="Grup A">Grup A</option>
+                                <option value="Grup B">Grup B</option>
+                                <option value="Grup C">Grup C</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="att-employee-list-container" class="hidden">
+                        <div class="flex justify-between items-center bg-gray-100 p-3 rounded-t-lg border border-gray-200">
+                            <span class="font-semibold text-gray-700 text-sm">Daftar Karyawan</span>
+                            <button onclick="setAllAttendance('HADIR')" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full hover:bg-green-200 font-medium">Set Semua HADIR</button>
+                        </div>
+                        <div class="border border-t-0 border-gray-200 rounded-b-lg overflow-hidden max-h-96 overflow-y-auto">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm text-left">
+                                <thead class="bg-gray-50 sticky top-0 z-10">
+                                    <tr>
+                                        <th class="px-4 py-2 font-medium text-gray-500">ID</th>
+                                        <th class="px-4 py-2 font-medium text-gray-500">Nama</th>
+                                        <th class="px-4 py-2 font-medium text-gray-500 w-48">Status Kehadiran</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="att-tbody" class="bg-white divide-y divide-gray-200">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button onclick="submitAttendance()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-sm font-medium transition-colors">
+                                <i class="fas fa-save mr-2"></i> Simpan Kehadiran
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: OVERTIME -->
+            <div id="view-overtime" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Input Lembur Karyawan</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                            <input type="date" id="ot-date" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Departemen</label>
+                            <select id="ot-dept" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" onchange="loadEmployeesForOvertime()">
+                                <option value="">-- Pilih Departemen --</option>
+                                <option value="DUMPING">DUMPING</option>
+                                <option value="CRUSHER">CRUSHER</option>
+                                <option value="CCP">CCP</option>
+                                <option value="GWIP">GWIP</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Grup</label>
+                            <select id="ot-group" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" onchange="loadEmployeesForOvertime()">
+                                <option value="">-- Pilih Grup --</option>
+                                <option value="Grup A">Grup A</option>
+                                <option value="Grup B">Grup B</option>
+                                <option value="Grup C">Grup C</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Durasi Lembur (Jam)</label>
+                            <select id="ot-hours" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                <option value="3.5">3.5 Jam (Setengah hari kerja)</option>
+                                <option value="7.5">7.5 Jam (Longshift hari biasa)</option>
+                                <option value="10">10 Jam (Lembur 5 Jam hari libur)</option>
+                                <option value="14">14 Jam (Lembur 8 jam hari libur)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan / Pekerjaan</label>
+                        <input type="text" id="ot-remarks" placeholder="Contoh: Perbaikan unit / Target produksi" class="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <div id="ot-employee-list-container" class="hidden">
+                        <div class="flex items-center bg-gray-100 p-3 rounded-t-lg border border-gray-200">
+                            <input type="checkbox" id="ot-select-all" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 ml-2" onchange="toggleAllOvertime()">
+                            <label for="ot-select-all" class="ml-2 font-semibold text-gray-700 text-sm cursor-pointer">Pilih Semua Karyawan</label>
+                        </div>
+                        <div class="border border-t-0 border-gray-200 rounded-b-lg overflow-hidden max-h-96 overflow-y-auto p-4 bg-white">
+                            <div id="ot-checkbox-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button onclick="submitOvertime()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg shadow-sm font-medium transition-colors">
+                                <i class="fas fa-save mr-2"></i> Simpan Lembur
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: REPORTS -->
+            <div id="view-reports" class="hidden space-y-6">
+                <!-- Recap Filters -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-end">
+                     <div class="w-full md:w-auto">
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Periode Cut Off</label>
+                        <select id="rep-periode" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" onchange="renderReports()">
+                        </select>
+                    </div>
+                    <div class="w-full md:w-auto">
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Tipe Rekap</label>
+                        <select id="rep-type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" onchange="renderReports()">
+                            <option value="absen">Ranking Ketidakhadiran</option>
+                            <option value="lembur">Rekap Jam Lembur</option>
+                            <option value="lengkap">Rekap Keseluruhan (Detail)</option>
+                        </select>
+                    </div>
+                    <div class="w-full md:w-auto flex-1 flex justify-end">
+                         <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center">
+                            <i class="fas fa-file-excel mr-2"></i> Export Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm text-left">
+                            <thead class="bg-gray-50" id="rep-thead">
+                                <!-- Generated by JS based on selection -->
+                            </thead>
+                            <tbody id="rep-tbody" class="bg-white divide-y divide-gray-200">
+                                <!-- Generated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal Message -->
+    <div id="msg-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full mx-4 transform scale-95 transition-transform duration-300" id="msg-modal-content">
+            <div class="p-6 text-center">
+                <div id="msg-icon" class="text-4xl mb-4"></div>
+                <h3 id="msg-title" class="text-lg font-bold text-gray-800 mb-2"></h3>
+                <p id="msg-desc" class="text-gray-600 text-sm mb-6"></p>
+                <button onclick="closeModal()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // GANTI URL DI BAWAH INI DENGAN URL WEB APP GAS ANDA
+        // ==========================================
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbynLsxoOqWfEehRi4KAIGjt70fDNDzNf4NZliXFlgLTHc1FVsEQyT8EUf1HwEQmTUsVaQ/exec"; 
+        
+        // App State
+        let db = {
+            employees: [],
+            attendance: [],
+            overtime: []
+        };
+        
+        let charts = {};
+
+        // Utilities
+        const getEl = id => document.getElementById(id);
+        
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set default dates
+            getEl('att-date').valueAsDate = new Date();
+            getEl('ot-date').valueAsDate = new Date();
+            
+            generatePeriodeOptions();
+            
+            // Check if we need to load data
+            if(db.employees.length === 0){
+                loadData();
+            } else {
+                renderDashboard();
+            }
+        });
+
+        async function loadData() {
+            if(!GAS_URL || GAS_URL.includes("XXXXXXXXXX")) {
+                showModal('error', 'Konfigurasi URL', 'URL Apps Script belum disetting. Silahkan cek kode index.html.');
+                return;
+            }
+            
+            getEl('loading-overlay').classList.remove('hidden');
+            try {
+                const response = await fetch(`${GAS_URL}?action=getAllData`);
+                const result = await response.json();
+                
+                db.employees = result.employees || [];
+                db.attendance = result.attendance || [];
+                db.overtime = result.overtime || [];
+                
+                renderDashboard();
+                if(getEl('view-reports').classList.contains('hidden') === false) renderReports();
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                showModal('error', 'Koneksi Gagal', 'Gagal memuat data dari database. Pastikan URL Apps Script benar.');
+            } finally {
+                getEl('loading-overlay').classList.add('hidden');
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = getEl('sidebar');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        function navigate(page) {
+            // Hide all views
+            ['dashboard', 'attendance', 'overtime', 'reports'].forEach(v => {
+                getEl(`view-${v}`).classList.add('hidden');
+                getEl(`nav-${v}`).classList.remove('sidebar-active');
+            });
+            
+            // Show selected
+            getEl(`view-${page}`).classList.remove('hidden');
+            getEl(`nav-${page}`).classList.add('sidebar-active');
+            
+            const titles = {
+                'dashboard': 'Dashboard Utama',
+                'attendance': 'Input Kehadiran Batch',
+                'overtime': 'Input Lembur Karyawan',
+                'reports': 'Rekap & Peringkat'
+            };
+            getEl('page-title').innerText = titles[page];
+            
+            if(window.innerWidth < 768) {
+                toggleSidebar(); // Close sidebar on mobile after clicking
+            }
+
+            if(page === 'dashboard') renderDashboard();
+            if(page === 'reports') renderReports();
+        }
+
+        function showModal(type, title, desc) {
+            const modal = getEl('msg-modal');
+            const icon = getEl('msg-icon');
+            
+            if(type === 'success') {
+                icon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
+            } else if(type === 'error') {
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+            } else {
+                icon.innerHTML = '<i class="fas fa-info-circle text-blue-500"></i>';
+            }
+            
+            getEl('msg-title').innerText = title;
+            getEl('msg-desc').innerText = desc;
+            
+            modal.classList.remove('hidden');
+            // Small delay to allow display:block to apply before animating opacity
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                getEl('msg-modal-content').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = getEl('msg-modal');
+            modal.classList.add('opacity-0');
+            getEl('msg-modal-content').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Generate cut-off periods: 16 Previous Month to 15 Current Month
+        function generatePeriodeOptions() {
+            const selects = [getEl('dash-periode'), getEl('rep-periode')];
+            let today = new Date();
+            let optionsHTML = '';
+            
+            // Generate last 6 periods
+            for(let i=0; i<6; i++) {
+                let d = new Date(today.getFullYear(), today.getMonth() - i, 15);
+                let start = new Date(d.getFullYear(), d.getMonth() - 1, 16);
+                let end = new Date(d.getFullYear(), d.getMonth(), 15);
+                
+                let val = `${start.toISOString().split('T')[0]}_${end.toISOString().split('T')[0]}`;
+                let label = `Periode: 16 ${start.toLocaleString('id-ID',{month:'short'})} - 15 ${end.toLocaleString('id-ID',{month:'short', year:'numeric'})}`;
+                
+                // Select current active period
+                let isSelected = '';
+                if(i===0 && today.getDate() <= 15) isSelected = 'selected';
+                else if(i===1 && today.getDate() > 15) isSelected = 'selected'; // wait, if today > 15, current period is 16 cur - 15 next. We need to handle this.
+                
+                optionsHTML += `<option value="${val}">${label}</option>`;
+            }
+            
+            selects.forEach(sel => sel.innerHTML = optionsHTML);
+        }
+
+        function getActiveDateRange(selectId) {
+            let val = getEl(selectId).value;
+            if(!val) return {start: new Date(0), end: new Date()};
+            let parts = val.split('_');
+            return {
+                start: new Date(parts[0] + 'T00:00:00'),
+                end: new Date(parts[1] + 'T23:59:59')
+            };
+        }
+
+        function isDateInRange(dateString, start, end) {
+            let d = new Date(dateString);
+            return d >= start && d <= end;
+        }
+
+        function renderDashboard() {
+            if(db.employees.length === 0) return;
+            
+            const range = getActiveDateRange('dash-periode');
+            const deptFilter = getEl('dash-dept').value;
+            
+            // Filter Data
+            const activeEmps = db.employees.filter(e => e.Status === "Aktif" && (deptFilter === 'ALL' || e.Departemen === deptFilter));
+            const empIds = new Set(activeEmps.map(e => String(e["Employee ID"])));
+            
+            const periodAtt = db.attendance.filter(a => isDateInRange(a.Tanggal, range.start, range.end) && empIds.has(String(a["Employee ID"])));
+            const periodOt = db.overtime.filter(o => isDateInRange(o.Tanggal, range.start, range.end) && empIds.has(String(o["Employee ID"])));
+
+            // Calculate KPIs
+            let totalMasuk = periodAtt.filter(a => a.Status === 'HADIR').length;
+            let totalAbsen = periodAtt.filter(a => ['ALPHA', 'SAKIT', 'IZIN'].includes(a.Status)).length;
+            let totalOtHours = periodOt.reduce((sum, o) => sum + parseFloat(o["Jam Lembur"] || 0), 0);
+            
+            getEl('kpi-total-emp').innerText = activeEmps.length;
+            getEl('kpi-total-hadir').innerText = totalMasuk;
+            getEl('kpi-total-absen').innerText = totalAbsen;
+            getEl('kpi-total-ot').innerText = totalOtHours.toFixed(1) + ' Jam';
+            
+            let avg = periodAtt.length > 0 ? ((totalMasuk / (totalMasuk + totalAbsen)) * 100).toFixed(1) : 0;
+            getEl('kpi-avg-att').innerText = avg + '%';
+
+            // Prepare Data for Charts
+            drawCharts(activeEmps, periodAtt);
+        }
+
+        function drawCharts(employees, attendance) {
+            // Group Stats
+            let groupStats = {};
+            attendance.forEach(a => {
+                let g = a.Departemen + ' ' + a.Grup;
+                if(!groupStats[g]) groupStats[g] = { hadir: 0, absen: 0 };
+                if(a.Status === 'HADIR') groupStats[g].hadir++;
+                else if(['ALPHA', 'SAKIT', 'IZIN'].includes(a.Status)) groupStats[g].absen++;
+            });
+
+            let labels = Object.keys(groupStats);
+            let dataHadir = labels.map(l => groupStats[l].hadir);
+            let dataAbsen = labels.map(l => groupStats[l].absen);
+
+            if(charts.attendance) charts.attendance.destroy();
+            const ctxAtt = getEl('chartAttendance').getContext('2d');
+            charts.attendance = new Chart(ctxAtt, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Hadir', data: dataHadir, backgroundColor: '#3b82f6' },
+                        { label: 'Tidak Hadir', data: dataAbsen, backgroundColor: '#ef4444' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Worst Absence
+            let empAbsence = {};
+            attendance.filter(a => ['ALPHA', 'SAKIT', 'IZIN'].includes(a.Status)).forEach(a => {
+                let name = a.Nama;
+                empAbsence[name] = (empAbsence[name] || 0) + 1;
+            });
+            
+            let sortedWorst = Object.keys(empAbsence).sort((a,b) => empAbsence[b] - empAbsence[a]).slice(0, 10);
+            let worstData = sortedWorst.map(name => empAbsence[name]);
+
+            if(charts.worst) charts.worst.destroy();
+            const ctxWorst = getEl('chartWorstAbsence').getContext('2d');
+            charts.worst = new Chart(ctxWorst, {
+                type: 'bar',
+                data: {
+                    labels: sortedWorst,
+                    datasets: [{
+                        label: 'Hari Tidak Hadir',
+                        data: worstData,
+                        backgroundColor: '#f59e0b',
+                        borderRadius: 4
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true } } }
+            });
+        }
+
+        function loadEmployeesForAttendance() {
+            const dept = getEl('att-dept').value;
+            const group = getEl('att-group').value;
+            const container = getEl('att-employee-list-container');
+            const tbody = getEl('att-tbody');
+            
+            if(!dept || !group) {
+                container.classList.add('hidden');
+                return;
+            }
+            
+            let filtered = db.employees.filter(e => e.Departemen === dept && e.Grup === group && e.Status === "Aktif");
+            
+            if(filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="px-4 py-8 text-center text-gray-500">Tidak ada karyawan di grup ini.</td></tr>';
+            } else {
+                let html = '';
+                filtered.forEach(e => {
+                    const selectId = `att-status-${e["Employee ID"]}`;
+                    html += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 whitespace-nowrap">${e["Employee ID"]}</td>
+                            <td class="px-4 py-2 font-medium">${e["Nama"]}</td>
+                            <td class="px-4 py-2">
+                                <select id="${selectId}" data-id="${e["Employee ID"]}" data-nama="${e["Nama"]}" class="att-status-select bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 block w-full p-2">
+                                    <option value="HADIR">HADIR</option>
+                                    <option value="ALPHA">ALPHA</option>
+                                    <option value="SAKIT">SAKIT</option>
+                                    <option value="IZIN">IZIN</option>
+                                    <option value="CUTI">CUTI</option>
+                                    <option value="OFF">OFF</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            }
+            container.classList.remove('hidden');
+        }
+
+        function setAllAttendance(status) {
+            document.querySelectorAll('.att-status-select').forEach(select => {
+                select.value = status;
+            });
+        }
+
+        async function submitAttendance() {
+            const date = getEl('att-date').value;
+            const dept = getEl('att-dept').value;
+            const group = getEl('att-group').value;
+            
+            if(!date) return showModal('info', 'Peringatan', 'Harap pilih tanggal terlebih dahulu.');
+            
+            const selects = document.querySelectorAll('.att-status-select');
+            if(selects.length === 0) return;
+
+            let payloadData = [];
+            selects.forEach(sel => {
+                payloadData.push({
+                    tanggal: date,
+                    id: sel.getAttribute('data-id'),
+                    nama: sel.getAttribute('data-nama'),
+                    dept: dept,
+                    grup: group,
+                    status: sel.value
+                });
+            });
+
+            getEl('loading-overlay').classList.remove('hidden');
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addKehadiranBatch', data: payloadData })
+                });
+                const res = await response.json();
+                if(res.status === 'success') {
+                    showModal('success', 'Berhasil', `${payloadData.length} data kehadiran berhasil disimpan.`);
+                    // Append local db to reflect changes instantly without full reload
+                    payloadData.forEach(p => db.attendance.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Departemen": p.dept, "Grup": p.grup, "Status": p.status}));
+                } else throw new Error(res.message);
+            } catch (err) {
+                showModal('error', 'Gagal Menyimpan', err.message || 'Terjadi kesalahan jaringan.');
+            } finally {
+                getEl('loading-overlay').classList.add('hidden');
+            }
+        }
+
+        function loadEmployeesForOvertime() {
+            const dept = getEl('ot-dept').value;
+            const group = getEl('ot-group').value;
+            const container = getEl('ot-employee-list-container');
+            const grid = getEl('ot-checkbox-grid');
+            
+            if(!dept || !group) {
+                container.classList.add('hidden');
+                return;
+            }
+            
+            let filtered = db.employees.filter(e => e.Departemen === dept && e.Grup === group && e.Status === "Aktif");
+            
+            if(filtered.length === 0) {
+                grid.innerHTML = '<div class="col-span-full py-4 text-center text-gray-500">Tidak ada karyawan.</div>';
+            } else {
+                let html = '';
+                filtered.forEach(e => {
+                    html += `
+                        <label class="flex items-start space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                            <input type="checkbox" value="${e["Employee ID"]}" data-nama="${e["Nama"]}" class="ot-emp-check w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 mt-0.5">
+                            <div class="flex flex-col">
+                                <span class="font-medium text-gray-800 text-sm">${e["Nama"]}</span>
+                                <span class="text-xs text-gray-500">${e["Employee ID"]}</span>
+                            </div>
+                        </label>
+                    `;
+                });
+                grid.innerHTML = html;
+            }
+            getEl('ot-select-all').checked = false;
+            container.classList.remove('hidden');
+        }
+
+        function toggleAllOvertime() {
+            const isChecked = getEl('ot-select-all').checked;
+            document.querySelectorAll('.ot-emp-check').forEach(chk => chk.checked = isChecked);
+        }
+
+        async function submitOvertime() {
+            const date = getEl('ot-date').value;
+            const dept = getEl('ot-dept').value;
+            const group = getEl('ot-group').value;
+            const hours = getEl('ot-hours').value;
+            const remarks = getEl('ot-remarks').value;
+            
+            if(!date || !remarks) return showModal('info', 'Peringatan', 'Harap isi Tanggal dan Keterangan Lembur.');
+            
+            const checks = document.querySelectorAll('.ot-emp-check:checked');
+            if(checks.length === 0) return showModal('info', 'Peringatan', 'Pilih minimal satu karyawan untuk dilemburkan.');
+
+            let payloadData = [];
+            checks.forEach(chk => {
+                payloadData.push({
+                    tanggal: date,
+                    id: chk.value,
+                    nama: chk.getAttribute('data-nama'),
+                    dept: dept,
+                    grup: group,
+                    jamLembur: parseFloat(hours),
+                    keterangan: remarks
+                });
+            });
+
+            getEl('loading-overlay').classList.remove('hidden');
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addLemburBatch', data: payloadData })
+                });
+                const res = await response.json();
+                if(res.status === 'success') {
+                    showModal('success', 'Berhasil', `${payloadData.length} data lembur berhasil disimpan.`);
+                    payloadData.forEach(p => db.overtime.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Departemen": p.dept, "Grup": p.grup, "Jam Lembur": p.jamLembur, "Keterangan": p.keterangan}));
+                    // Reset form
+                    getEl('ot-remarks').value = '';
+                    checks.forEach(chk => chk.checked = false);
+                    getEl('ot-select-all').checked = false;
+                } else throw new Error(res.message);
+            } catch (err) {
+                showModal('error', 'Gagal Menyimpan', err.message || 'Terjadi kesalahan jaringan.');
+            } finally {
+                getEl('loading-overlay').classList.add('hidden');
+            }
+        }
+
+        function renderReports() {
+            if(db.employees.length === 0) return;
+            
+            const range = getActiveDateRange('rep-periode');
+            const type = getEl('rep-type').value;
+            const thead = getEl('rep-thead');
+            const tbody = getEl('rep-tbody');
+            
+            let htmlHead = '';
+            let htmlBody = '';
+            
+            // Generate basic stats per employee
+            let stats = {};
+            db.employees.filter(e => e.Status === "Aktif").forEach(e => {
+                stats[e["Employee ID"]] = {
+                    id: e["Employee ID"], name: e["Nama"], dept: e["Departemen"], grup: e["Grup"],
+                    hadir: 0, absen: 0, jamLembur: 0
+                };
+            });
+            
+            db.attendance.filter(a => isDateInRange(a.Tanggal, range.start, range.end)).forEach(a => {
+                let s = stats[String(a["Employee ID"])];
+                if(s) {
+                    if(a.Status === 'HADIR') s.hadir++;
+                    else if(['ALPHA', 'SAKIT', 'IZIN'].includes(a.Status)) s.absen++;
+                }
+            });
+            
+            db.overtime.filter(o => isDateInRange(o.Tanggal, range.start, range.end)).forEach(o => {
+                let s = stats[String(o["Employee ID"])];
+                if(s) s.jamLembur += parseFloat(o["Jam Lembur"] || 0);
+            });
+
+            let statsArray = Object.values(stats);
+
+            if(type === 'absen') {
+                htmlHead = `<tr>
+                    <th class="px-4 py-3 font-semibold text-gray-600">Rank</th>
+                    <th class="px-4 py-3 font-semibold text-gray-600">Nama</th>
+                    <th class="px-4 py-3 font-semibold text-gray-600">Bagian/Grup</th>
+                    <th class="px-4 py-3 font-semibold text-gray-600 text-center">Total Tidak Hadir</th>
+                </tr>`;
+                
+                statsArray.sort((a,b) => b.absen - a.absen); // Descending absen
+                
+                statsArray.filter(s => s.absen > 0).forEach((s, idx) => {
+                    let rankBadge = `${idx + 1}`;
+                    if(idx === 0) rankBadge = '🥇 1';
+                    else if(idx === 1) rankBadge = '🥈 2';
+                    else if(idx === 2) rankBadge = '🥉 3';
+                    
+                    htmlBody += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-bold text-gray-700">${rankBadge}</td>
+                        <td class="px-4 py-3 font-medium text-gray-800"><div class="text-sm">${s.name}</div><div class="text-xs text-gray-500">${s.id}</div></td>
+                        <td class="px-4 py-3"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${s.dept} - ${s.grup}</span></td>
+                        <td class="px-4 py-3 text-center text-red-600 font-bold text-lg">${s.absen} Hari</td>
+                    </tr>`;
+                });
+                
+                if(htmlBody === '') htmlBody = '<tr><td colspan="4" class="px-4 py-6 text-center text-gray-500">Tidak ada data ketidakhadiran di periode ini. Hebat!</td></tr>';
+            } 
+            else if(type === 'lembur') {
+                htmlHead = `<tr>
+                    <th class="px-4 py-3 font-semibold text-gray-600">Rank</th>
+                    <th class="px-4 py-3 font-semibold text-gray-600">Nama</th>
+                    <th class="px-4 py-3 font-semibold text-gray-600 text-center">Total Jam Lembur</th>
+                </tr>`;
+                
+                statsArray.sort((a,b) => b.jamLembur - a.jamLembur); // Descending overtime
+                
+                statsArray.filter(s => s.jamLembur > 0).forEach((s, idx) => {
+                    htmlBody += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-gray-500">${idx+1}</td>
+                        <td class="px-4 py-3 font-medium"><div class="text-sm text-gray-800">${s.name}</div><div class="text-xs text-gray-500">${s.dept} - ${s.grup}</div></td>
+                        <td class="px-4 py-3 text-center text-green-600 font-bold">${s.jamLembur} Jam</td>
+                    </tr>`;
+                });
+                
+                if(htmlBody === '') htmlBody = '<tr><td colspan="3" class="px-4 py-6 text-center text-gray-500">Tidak ada lembur di periode ini.</td></tr>';
+            }
+            else { // lengkap
+                htmlHead = `<tr>
+                    <th class="px-4 py-3 font-semibold text-gray-600">ID & Nama</th>
+                    <th class="px-4 py-3 font-semibold text-gray-600">Bagian</th>
+                    <th class="px-4 py-3 font-semibold text-gray-600 text-center">Kehadiran (%)</th>
+                    <th class="px-4 py-3 font-semibold text-gray-600 text-center">Total Lembur</th>
+                </tr>`;
+                
+                statsArray.forEach(s => {
+                    let totalHariKerja = s.hadir + s.absen;
+                    let persentase = totalHariKerja > 0 ? Math.round((s.hadir / totalHariKerja) * 100) : 0;
+                    let colorCode = persentase < 80 ? 'text-red-500' : (persentase < 95 ? 'text-yellow-500' : 'text-green-500');
+                    
+                    htmlBody += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">
+                            <div class="text-sm font-medium text-gray-800">${s.name}</div>
+                            <div class="text-xs text-gray-500">${s.id}</div>
+                        </td>
+                        <td class="px-4 py-3 text-sm">${s.dept} - ${s.grup}</td>
+                        <td class="px-4 py-3 text-center">
+                            <div class="font-bold ${colorCode}">${persentase}%</div>
+                            <div class="text-xs text-gray-400">Masuk: ${s.hadir}, Absen: ${s.absen}</div>
+                        </td>
+                        <td class="px-4 py-3 text-center font-semibold text-gray-700">${s.jamLembur} Jam</td>
+                    </tr>`;
+                });
+            }
+
+            thead.innerHTML = htmlHead;
+            tbody.innerHTML = htmlBody;
+        }
+
+        // PWA Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    console.log('SW registered!', reg);
+                }).catch(err => console.log('SW registration failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
