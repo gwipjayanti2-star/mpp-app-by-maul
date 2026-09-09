@@ -71,7 +71,7 @@
         }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden antialiased">
+<body class="flex h-screen overflow-hidden antialiased relative">
 
     <!-- Layar Login -->
     <div id="login-screen" class="fixed inset-0 bg-navy-900 z-50 flex flex-col items-center justify-center transition-opacity duration-300">
@@ -84,12 +84,18 @@
         </div>
     </div>
 
+    <!-- Mobile Overlay untuk Sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-navy-900/60 z-30 hidden md:hidden transition-opacity duration-300 opacity-0 backdrop-blur-sm" onclick="toggleSidebar()"></div>
+
     <!-- Sidebar -->
     <aside class="w-64 bg-navy-900 text-white flex flex-col transition-transform duration-300 md:relative absolute z-40 h-full transform -translate-x-full md:translate-x-0 shadow-2xl" id="sidebar">
         <div class="h-24 flex items-center justify-center px-6 border-b border-navy-700/50 py-4 relative">
             <img src="https://www.image2url.com/r2/default/files/1788922910146-4d3196e8-d349-4a8e-9d23-48a0b748af9e.png" alt="Logo" class="h-20 w-auto object-contain drop-shadow-md">
-            <button class="md:hidden absolute right-4 text-gray-400 hover:text-white" onclick="toggleSidebar()">
-                <i class="fas fa-times text-xl"></i>
+            <!-- Tombol Close Sidebar Mobile -->
+            <button type="button" class="block md:hidden absolute right-4 top-1/2 transform -translate-y-1/2 p-2 text-gray-400 hover:text-white focus:outline-none" onclick="toggleSidebar()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
             </button>
         </div>
 
@@ -128,8 +134,11 @@
         <!-- Topbar -->
         <header class="bg-white border-b border-gray-200 z-10 px-4 md:px-6 h-20 flex items-center justify-between shadow-sm flex-shrink-0">
             <div class="flex items-center">
-                <button class="md:hidden mr-4 text-navy-900 hover:text-gold-500 transition-colors" onclick="toggleSidebar()">
-                    <i class="fas fa-bars text-xl"></i>
+                <!-- Tombol Hamburger Mobile -->
+                <button type="button" class="block md:hidden mr-3 p-2 text-navy-900 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-navy-900/50" onclick="toggleSidebar()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
                 </button>
                 <h2 class="text-lg md:text-xl font-bold text-navy-900 tracking-tight" id="page-title">Executive Dashboard</h2>
             </div>
@@ -223,6 +232,7 @@
                                     <option value="CRUSHER">CRUSHER</option>
                                     <option value="CCP">CCP</option>
                                     <option value="GWIP">GWIP</option>
+                                    <option value="ADMIN GWIP">ADMIN GWIP</option>
                                 </select>
                             </div>
                             <div>
@@ -232,6 +242,7 @@
                                     <option value="Grup A">Grup A</option>
                                     <option value="Grup B">Grup B</option>
                                     <option value="Grup C">Grup C</option>
+                                    <option value="NON SHIFT">NON SHIFT</option>
                                 </select>
                             </div>
                         </div>
@@ -286,6 +297,7 @@
                                     <option value="CRUSHER">CRUSHER</option>
                                     <option value="CCP">CCP</option>
                                     <option value="GWIP">GWIP</option>
+                                    <option value="ADMIN GWIP">ADMIN GWIP</option>
                                 </select>
                             </div>
                             <div>
@@ -295,6 +307,7 @@
                                     <option value="Grup A">Grup A</option>
                                     <option value="Grup B">Grup B</option>
                                     <option value="Grup C">Grup C</option>
+                                    <option value="NON SHIFT">NON SHIFT</option>
                                 </select>
                             </div>
                             <div>
@@ -365,6 +378,7 @@
                                 <option value="CRUSHER">CRUSHER</option>
                                 <option value="CCP">CCP</option>
                                 <option value="GWIP">GWIP</option>
+                                <option value="ADMIN GWIP">ADMIN GWIP</option>
                             </select>
                         </div>
                         <div>
@@ -374,6 +388,7 @@
                                 <option value="Grup A">Grup A</option>
                                 <option value="Grup B">Grup B</option>
                                 <option value="Grup C">Grup C</option>
+                                <option value="NON SHIFT">NON SHIFT</option>
                             </select>
                         </div>
                     </div>
@@ -519,9 +534,22 @@
             }
         }
 
-        // NAVIGASI
+        // NAVIGASI DAN SIDEBAR MOBILE
         function toggleSidebar() {
-            getEl('sidebar').classList.toggle('-translate-x-full');
+            const sidebar = getEl('sidebar');
+            const overlay = getEl('sidebar-overlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            
+            if (!sidebar.classList.contains('-translate-x-full')) {
+                // Saat sidebar terbuka
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            } else {
+                // Saat sidebar tertutup
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+            }
         }
 
         function navigate(page) {
@@ -541,7 +569,12 @@
             };
             getEl('page-title').innerText = titles[page];
             
-            if(window.innerWidth < 768) toggleSidebar();
+            const sidebar = getEl('sidebar');
+            // Jika di tampilan mobile dan sidebar sedang terbuka, maka tutup
+            if(window.innerWidth < 768 && !sidebar.classList.contains('-translate-x-full')) {
+                toggleSidebar();
+            }
+            
             if(page === 'dashboard') renderDashboard();
             if(page === 'reports') renderReports();
         }
