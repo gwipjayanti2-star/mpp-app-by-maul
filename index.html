@@ -225,7 +225,7 @@
                                 <input type="date" id="att-date" class="w-full p-2.5 md:p-3 bg-white border border-gray-200 rounded-xl focus:ring-navy-900 focus:border-navy-900 text-sm shadow-sm transition-colors" onchange="loadEmployeesForAttendance()">
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-navy-900 mb-2">Departemen</label>
+                                <label class="block text-sm font-bold text-navy-900 mb-2">Unit</label>
                                 <select id="att-dept" class="w-full p-2.5 md:p-3 bg-white border border-gray-200 rounded-xl focus:ring-navy-900 focus:border-navy-900 text-sm shadow-sm transition-colors cursor-pointer" onchange="loadEmployeesForAttendance()">
                                     <option value="">-- Pilih --</option>
                                     <option value="DUMPING">DUMPING</option>
@@ -287,7 +287,7 @@
                                 <input type="date" id="ot-date" class="w-full p-2.5 md:p-3 bg-white border border-gray-200 rounded-xl focus:ring-gold-500 text-sm shadow-sm transition-colors">
                             </div>
                             <div>
-                                <label class="block text-sm font-bold text-navy-900 mb-2">Departemen</label>
+                                <label class="block text-sm font-bold text-navy-900 mb-2">Unit</label>
                                 <select id="ot-dept" class="w-full p-2.5 md:p-3 bg-white border border-gray-200 rounded-xl focus:ring-gold-500 text-sm shadow-sm transition-colors cursor-pointer" onchange="loadEmployeesForOvertime()">
                                     <option value="">-- Pilih --</option>
                                     <option value="DUMPING">DUMPING</option>
@@ -372,9 +372,9 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Departemen</label>
+                            <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Unit</label>
                             <select id="rep-dept" class="w-full bg-white border border-gray-200 text-navy-900 text-sm rounded-xl focus:ring-gold-500 p-2.5 font-bold shadow-sm transition-colors cursor-pointer" onchange="renderReports()">
-                                <option value="ALL">Semua Departemen</option>
+                                <option value="ALL">Semua Unit</option>
                                 <option value="DUMPING">DUMPING</option>
                                 <option value="CRUSHER">CRUSHER</option>
                                 <option value="CCP">CCP</option>
@@ -686,15 +686,15 @@
         }
 
         function drawCharts(employees, attendance, range) {
-            // PERUBAHAN: Menghitung Total Lembur per Departemen untuk Grafik
+            // PERUBAHAN: Menghitung Total Lembur per Unit untuk Grafik
             let deptOtStats = {};
-            // Inisialisasi semua departemen agar tampil meskipun nilainya 0
-            const allDepts = [...new Set(employees.map(e => e.Departemen))].filter(Boolean);
+            // Inisialisasi semua Unit agar tampil meskipun nilainya 0
+            const allDepts = [...new Set(employees.map(e => e.Unit))].filter(Boolean);
             allDepts.forEach(d => deptOtStats[d] = 0);
 
             // Filter data lembur sesuai periode
             db.overtime.filter(o => isDateInRange(o.Tanggal, range.start, range.end)).forEach(o => {
-                let d = o.Departemen;
+                let d = o.Unit;
                 if(d && deptOtStats[d] !== undefined) {
                     deptOtStats[d] += parseFloat(o["Jam Lembur"] || 0);
                 }
@@ -726,7 +726,7 @@
             let empAbsence = {};
             attendance.filter(a => ['ALPHA', 'SAKIT', 'IZIN'].includes(a.Status)).forEach(a => {
                 let name = a.Nama;
-                if(!empAbsence[name]) empAbsence[name] = { count: 0, dept: a.Departemen, grup: a.Grup };
+                if(!empAbsence[name]) empAbsence[name] = { count: 0, dept: a.Unit, grup: a.Grup };
                 empAbsence[name].count += 1;
             });
             
@@ -768,13 +768,13 @@
                 return;
             }
 
-            const isDuplicate = db.attendance.some(a => a.Tanggal === date && a.Departemen === dept && a.Grup === group);
+            const isDuplicate = db.attendance.some(a => a.Tanggal === date && a.Unit === dept && a.Grup === group);
             if(isDuplicate) {
                 grid.innerHTML = `
                 <div class="py-12 flex flex-col items-center justify-center text-center">
                     <i class="fas fa-shield-check text-5xl text-green-500 mb-4 drop-shadow-md"></i>
                     <p class="text-navy-900 font-black text-xl mb-2 tracking-tight">Data Sudah Tersimpan</p>
-                    <p class="text-gray-500 text-sm max-w-xs">Kehadiran untuk departemen dan grup ini pada tanggal yang dipilih sudah berhasil diinput sebelumnya. Ubah tanggal atau unit kerja.</p>
+                    <p class="text-gray-500 text-sm max-w-xs">Kehadiran untuk Unit dan grup ini pada tanggal yang dipilih sudah berhasil diinput sebelumnya. Ubah tanggal atau unit kerja.</p>
                 </div>`;
                 getEl('att-header-actions').classList.add('hidden');
                 getEl('att-submit-container').classList.add('hidden');
@@ -785,7 +785,7 @@
                 getEl('att-submit-container').classList.remove('hidden');
             }
             
-            let filtered = db.employees.filter(e => e.Departemen === dept && e.Grup === group && e.Status === "Aktif");
+            let filtered = db.employees.filter(e => e.Unit === dept && e.Grup === group && e.Status === "Aktif");
             
             if(filtered.length === 0) {
                 grid.innerHTML = '<div class="py-8 text-center text-gray-500 font-bold">Tidak ada karyawan di kriteria ini.</div>';
@@ -858,7 +858,7 @@
             const group = getEl('att-group').value;
             if(!date) return showModal('info', 'Tanggal Kosong', 'Harap lengkapi tanggal kehadiran.');
             
-            const isDuplicate = db.attendance.some(a => a.Tanggal === date && a.Departemen === dept && a.Grup === group);
+            const isDuplicate = db.attendance.some(a => a.Tanggal === date && a.Unit === dept && a.Grup === group);
             if(isDuplicate) {
                 return showModal('error', 'Data Sudah Tersimpan', 'Kehadiran untuk unit ini pada tanggal tersebut sudah diinput sebelumnya.');
             }
@@ -887,7 +887,7 @@
                 const res = await response.json();
                 if(res.status === 'success') {
                     showModal('success', 'Berhasil Disimpan', `${payloadData.length} data kehadiran terekam.`);
-                    payloadData.forEach(p => db.attendance.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Departemen": p.dept, "Grup": p.grup, "Status": p.status}));
+                    payloadData.forEach(p => db.attendance.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Unit": p.dept, "Grup": p.grup, "Status": p.status}));
                     // Perbarui cache
                     localStorage.setItem(CACHE_KEY, JSON.stringify(db));
                 } else throw new Error(res.message);
@@ -911,7 +911,7 @@
                 return;
             }
             
-            let filtered = db.employees.filter(e => e.Departemen === dept && e.Grup === group && e.Status === "Aktif");
+            let filtered = db.employees.filter(e => e.Unit === dept && e.Grup === group && e.Status === "Aktif");
             
             if(filtered.length === 0) {
                 grid.innerHTML = '<div class="col-span-full py-8 text-center text-gray-500 font-bold">Tidak ada karyawan.</div>';
@@ -961,7 +961,7 @@
             const group = getEl('ot-group').value;
             
             if(!date || !dept || !group) {
-                return showModal('info', 'Data Belum Lengkap', 'Pilih Tanggal, Departemen, dan Grup terlebih dahulu sebelum membagikan.');
+                return showModal('info', 'Data Belum Lengkap', 'Pilih Tanggal, Unit, dan Grup terlebih dahulu sebelum membagikan.');
             }
 
             const checks = document.querySelectorAll('.ot-emp-check:checked');
@@ -973,7 +973,7 @@
 
             let text = `*DAFTAR LEMBUR*\n`;
             text += `Tanggal: ${formattedDate}\n`;
-            text += `Departemen: ${dept}\n`;
+            text += `Unit: ${dept}\n`;
             text += `Grup: ${group}\n`;
             text += `\n*Daftar Karyawan:*\n`;
 
@@ -1015,7 +1015,7 @@
                 const res = await response.json();
                 if(res.status === 'success') {
                     showModal('success', 'Lembur Disimpan', `${payloadData.length} data lembur direkam.`);
-                    payloadData.forEach(p => db.overtime.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Departemen": p.dept, "Grup": p.grup, "Jam Lembur": p.jamLembur, "Keterangan": p.keterangan}));
+                    payloadData.forEach(p => db.overtime.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Unit": p.dept, "Grup": p.grup, "Jam Lembur": p.jamLembur, "Keterangan": p.keterangan}));
                     // Perbarui cache
                     localStorage.setItem(CACHE_KEY, JSON.stringify(db));
                     
@@ -1052,12 +1052,12 @@
             let stats = {};
             db.employees.filter(e => {
                 let match = e.Status === "Aktif";
-                if(deptFilter !== 'ALL' && e.Departemen !== deptFilter) match = false;
+                if(deptFilter !== 'ALL' && e.Unit !== deptFilter) match = false;
                 if(groupFilter !== 'ALL' && e.Grup !== groupFilter) match = false;
                 return match;
             }).forEach(e => {
                 stats[e["Employee ID"]] = {
-                    id: e["Employee ID"], name: e["Nama"], dept: e["Departemen"], grup: e["Grup"],
+                    id: e["Employee ID"], name: e["Nama"], dept: e["Unit"], grup: e["Grup"],
                     hadir: 0, alpha: 0, sakit: 0, izin: 0, cuti: 0, jamLembur: 0
                 };
             });
