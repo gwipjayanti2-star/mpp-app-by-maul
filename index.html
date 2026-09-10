@@ -1110,6 +1110,9 @@
             const date = getEl('ot-date').value;
             const dept = getEl('ot-dept').value;
             const group = getEl('ot-group').value;
+            const remarks = getEl('ot-remarks').value || 'Tidak ada keterangan';
+            const hoursEl = getEl('ot-hours');
+            const hours = hoursEl.options[hoursEl.selectedIndex].text;
             
             if(!date || !dept || !group) {
                 return showModal('info', 'Data Belum Lengkap', 'Pilih Tanggal, Unit, dan Grup terlebih dahulu sebelum membagikan.');
@@ -1125,6 +1128,8 @@
             text += `Tanggal: ${formattedDate}\n`;
             text += `Unit: ${dept}\n`;
             text += `Grup: ${group}\n`;
+            text += `Durasi: ${hours}\n`;
+            text += `Keterangan: ${remarks}\n`;
             text += `\n*Daftar Karyawan:*\n`;
 
             checks.forEach((chk, index) => {
