@@ -108,6 +108,10 @@
             transform: scale(1.05);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
+        /* Style for disabled elements */
+        .cursor-not-allowed {
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden antialiased relative">
@@ -268,7 +272,6 @@
 
             <div id="view-attendance" class="hidden space-y-4 max-w-6xl mx-auto">
                 <div class="bg-white rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100 overflow-hidden">
-                    <!-- Header keterangan -->
                     <div class="p-3 sm:p-4 bg-gradient-to-r from-navy-900 to-navy-800 text-white">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/10 flex items-center justify-center text-sm sm:text-base backdrop-blur-sm"><i class="fas fa-user-check text-silver-400"></i></div>
@@ -354,8 +357,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-5 bg-gray-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100">
                             <div>
                                 <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Tanggal</label>
-                                <!-- Ditambahkan onchange trigger -->
-                                <input type="date" id="ot-date" onchange="loadEmployeesForOvertime()" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-silver-400 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all">
+                                <input type="date" id="ot-date" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-silver-400 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all" onchange="loadEmployeesForOvertime()">
                             </div>
                             <div>
                                 <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Unit</label>
@@ -584,7 +586,7 @@
             getEl('att-date').valueAsDate = new Date();
             getEl('ot-date').valueAsDate = new Date();
             generatePeriodeOptions();
-            preloadDataSilently();
+            preloadDataSilently(); 
         });
 
         function checkLogin() {
@@ -600,7 +602,7 @@
                     if(isDataReady) {
                         renderDashboard();
                         if(!getEl('view-reports').classList.contains('hidden')) renderReports();
-                        backgroundSync();
+                        backgroundSync(); 
                     } else {
                         loadData(false); 
                     }
@@ -743,9 +745,6 @@
             
             if(page === 'dashboard') renderDashboard();
             if(page === 'reports') renderReports();
-            // Refresh employee list if navigating to input pages to sync states based on dates
-            if(page === 'attendance') loadEmployeesForAttendance();
-            if(page === 'overtime') loadEmployeesForOvertime();
         }
 
         function showModal(type, title, desc) {
@@ -981,7 +980,6 @@
                 return;
             }
 
-            // Membuka UI dan menampilkan daftar karyawan secara utuh
             getEl('att-header-actions').classList.remove('hidden');
             getEl('att-submit-container').classList.remove('hidden');
             
@@ -994,56 +992,80 @@
                 filtered.forEach(e => {
                     const id = e["Employee ID"];
                     
-                    // Cek duplikasi per karyawan
-                    const existingRecord = db.attendance.find(a => a.Tanggal === date && String(a["Employee ID"]) === String(id));
-                    const isDisabled = existingRecord ? true : false;
-                    const savedStatus = existingRecord ? existingRecord.Status : null;
-
-                    let disableCardClass = isDisabled ? 'opacity-60 pointer-events-none bg-gray-50/50' : 'bg-white hover:shadow-md';
-                    let badgeHTML = isDisabled ? `<span class="bg-green-100 text-green-700 text-[9px] font-bold px-2 py-0.5 rounded-md ml-2 flex-shrink-0 border border-green-200"><i class="fas fa-check mr-1"></i>Sudah Input (${savedStatus})</span>` : '';
-
-                    html += `
-                    <div class="att-emp-card ${disableCardClass} border border-gray-100 rounded-xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2 transition-all" data-nama="${e["Nama"]}">
-                        <div>
-                            <div class="font-extrabold text-navy-900 text-sm sm:text-base flex items-center">${e["Nama"]} ${badgeHTML}</div>
-                            <div class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold mt-0.5">ID: ${id}</div>
-                        </div>
-                        <div class="flex flex-wrap gap-1.5 sm:gap-2 sm:w-auto w-full">`;
+                    // Cek apakah data karyawan ini sudah ada di tanggal yang dipilih
+                    const savedData = db.attendance.find(a => a.Tanggal === date && String(a["Employee ID"]) === String(id));
+                    const isSaved = !!savedData;
                     
-                    const statuses = [
-                        {val: 'HADIR', label: 'Hadir', icon: '<i class="fas fa-check"></i>', iconClass: 'text-xs sm:text-sm'},
-                        {val: 'ALPHA', label: 'Alpha', icon: 'A', iconClass: 'text-xs sm:text-sm'},
-                        {val: 'SAKIT', label: 'Sakit', icon: 'S', iconClass: 'text-xs sm:text-sm'},
-                        {val: 'IZIN', label: 'Izin', icon: 'I', iconClass: 'text-xs sm:text-sm'},
-                        {val: 'CUTI', label: 'Cuti', icon: 'C', iconClass: 'text-xs sm:text-sm'},
-                        {val: 'OFF', label: 'Off', icon: 'O', iconClass: 'text-xs sm:text-sm'}
-                    ];
+                    let stHadir = '', stAlpha = '', stSakit = '', stIzin = '', stCuti = '', stOff = '';
+                    if (isSaved) {
+                        if(savedData.Status === 'HADIR') stHadir = 'checked';
+                        else if(savedData.Status === 'ALPHA') stAlpha = 'checked';
+                        else if(savedData.Status === 'SAKIT') stSakit = 'checked';
+                        else if(savedData.Status === 'IZIN') stIzin = 'checked';
+                        else if(savedData.Status === 'CUTI') stCuti = 'checked';
+                        else if(savedData.Status === 'OFF') stOff = 'checked';
+                    } else {
+                        stHadir = 'checked'; // Default untuk yang belum disubmit
+                    }
 
-                    statuses.forEach(s => {
-                        let isChecked = '';
-                        if (isDisabled) {
-                            if (savedStatus === s.val) isChecked = 'checked';
-                        } else {
-                            if (s.val === 'HADIR') isChecked = 'checked';
-                        }
-
-                        let disabledAttr = isDisabled ? 'disabled' : '';
-                        let cursorClass = isDisabled ? 'cursor-not-allowed' : 'cursor-pointer';
-                        let checkedBg = isDisabled ? 'peer-checked:bg-gray-400 peer-checked:border-gray-400' : 'peer-checked:bg-navy-900 peer-checked:border-navy-900 hover:bg-gray-100';
-
-                        html += `
-                            <label class="${cursorClass} flex-1 sm:w-[56px]">
-                                <input type="radio" name="st_${id}" value="${s.val}" class="att-radio peer hidden" ${isChecked} ${disabledAttr}>
-                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full bg-gray-50 peer-checked:text-white ${checkedBg}">
-                                    <span class="block ${s.iconClass}">${s.icon}</span>
-                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">${s.label}</span>
-                                </div>
-                            </label>`;
-                    });
+                    const disabledAttr = isSaved ? 'disabled' : '';
+                    const cardStyle = isSaved ? 'bg-gray-50 border-gray-200 opacity-80' : 'bg-white border-gray-100 hover:shadow-md';
+                    const labelClass = isSaved ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer bg-gray-50 hover:bg-gray-100';
+                    const badge = isSaved ? `<div class="mt-1 text-[10px] text-green-600 font-bold"><i class="fas fa-check-circle"></i> Tersimpan (${savedData.Status})</div>` : '';
 
                     html += `
+                    <div class="att-emp-card ${cardStyle} rounded-xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2 transition-shadow" data-nama="${e["Nama"]}">
+                        <div>
+                            <div class="font-extrabold text-navy-900 text-sm sm:text-base">${e["Nama"]}</div>
+                            <div class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold mt-0.5">ID: ${id}</div>
+                            ${badge}
                         </div>
-                    </div>`;
+                        <div class="flex flex-wrap gap-1.5 sm:gap-2 sm:w-auto w-full">
+                            <label class="${isSaved ? 'cursor-not-allowed' : 'cursor-pointer'} flex-1 sm:w-[56px]">
+                                <input type="radio" name="st_${id}" value="HADIR" class="att-radio peer hidden" ${stHadir} ${disabledAttr}>
+                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full ${labelClass} peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
+                                    <span class="block text-xs sm:text-sm"><i class="fas fa-check"></i></span>
+                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Hadir</span>
+                                </div>
+                            </label>
+                            <label class="${isSaved ? 'cursor-not-allowed' : 'cursor-pointer'} flex-1 sm:w-[56px]">
+                                <input type="radio" name="st_${id}" value="ALPHA" class="att-radio peer hidden" ${stAlpha} ${disabledAttr}>
+                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full ${labelClass} peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
+                                    <span class="block text-xs sm:text-sm">A</span>
+                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Alpha</span>
+                                </div>
+                            </label>
+                            <label class="${isSaved ? 'cursor-not-allowed' : 'cursor-pointer'} flex-1 sm:w-[56px]">
+                                <input type="radio" name="st_${id}" value="SAKIT" class="att-radio peer hidden" ${stSakit} ${disabledAttr}>
+                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full ${labelClass} peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
+                                    <span class="block text-xs sm:text-sm">S</span>
+                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Sakit</span>
+                                </div>
+                            </label>
+                            <label class="${isSaved ? 'cursor-not-allowed' : 'cursor-pointer'} flex-1 sm:w-[56px]">
+                                <input type="radio" name="st_${id}" value="IZIN" class="att-radio peer hidden" ${stIzin} ${disabledAttr}>
+                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full ${labelClass} peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
+                                    <span class="block text-xs sm:text-sm">I</span>
+                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Izin</span>
+                                </div>
+                            </label>
+                            <label class="${isSaved ? 'cursor-not-allowed' : 'cursor-pointer'} flex-1 sm:w-[56px]">
+                                <input type="radio" name="st_${id}" value="CUTI" class="att-radio peer hidden" ${stCuti} ${disabledAttr}>
+                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full ${labelClass} peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
+                                    <span class="block text-xs sm:text-sm">C</span>
+                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Cuti</span>
+                                </div>
+                            </label>
+                            <label class="${isSaved ? 'cursor-not-allowed' : 'cursor-pointer'} flex-1 sm:w-[56px]">
+                                <input type="radio" name="st_${id}" value="OFF" class="att-radio peer hidden" ${stOff} ${disabledAttr}>
+                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full ${labelClass} peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
+                                    <span class="block text-xs sm:text-sm">O</span>
+                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Off</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    `;
                 });
                 grid.innerHTML = html;
             }
@@ -1061,11 +1083,12 @@
         }
 
         function setAllHadir() {
-            const cards = document.querySelectorAll('.att-emp-card:not(.pointer-events-none)');
+            const cards = document.querySelectorAll('.att-emp-card');
             let count = 0;
             cards.forEach(card => {
                 if(card.style.display !== 'none') {
-                    const radio = card.querySelector('input[value="HADIR"]');
+                    // Hanya set hadir jika inputnya belum di-disable (belum disubmit sebelumnya)
+                    const radio = card.querySelector('input[value="HADIR"]:not(:disabled)');
                     if(radio) { 
                         radio.checked = true; 
                         const evt = new Event('change');
@@ -1074,8 +1097,7 @@
                     }
                 }
             });
-            if(count > 0) showModal('info', 'Berhasil Direset', `${count} karyawan yang belum diinput dikembalikan ke status Hadir.`);
-            else showModal('info', 'Info', 'Tidak ada karyawan yang dapat direset statusnya.');
+            if(count > 0) showModal('info', 'Berhasil Direset', `${count} karyawan dikembalikan ke status Hadir.`);
         }
 
         function shareWhatsAppAttendance() {
@@ -1088,12 +1110,13 @@
             }
 
             let payloadData = [];
-            document.querySelectorAll('.att-emp-card:not(.pointer-events-none)').forEach(card => {
+            document.querySelectorAll('.att-emp-card').forEach(card => {
                 if(card.style.display !== 'none') { 
-                    const radios = card.querySelectorAll('input[type="radio"]:not([disabled])');
+                    const radios = card.querySelectorAll('input[type="radio"]');
                     if(radios.length > 0) {
                         const id = radios[0].name.split('_')[1];
                         const nama = card.getAttribute('data-nama');
+                        // Ambil yang ter-check, baik disabled maupun enabled, agar semua tampil di laporan share WA
                         const checked = card.querySelector(`input[name="st_${id}"]:checked`);
                         if(checked) {
                             payloadData.push({ id: id, nama: nama, status: checked.value });
@@ -1102,7 +1125,7 @@
                 }
             });
 
-            if(payloadData.length === 0) return showModal('info', 'Kosong', 'Tidak ada data kehadiran baru untuk dibagikan (semua mungkin sudah diinput sebelumnya).');
+            if(payloadData.length === 0) return showModal('info', 'Karyawan Kosong', 'Tidak ada data karyawan untuk dibagikan.');
 
             const dateObj = new Date(date);
             const formattedDate = dateObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -1135,20 +1158,20 @@
             if(!date) return showModal('info', 'Tanggal Kosong', 'Harap lengkapi tanggal kehadiran.');
             
             let payloadData = [];
-            // Hanya ambil card yang TIDAK didisable
-            document.querySelectorAll('.att-emp-card:not(.pointer-events-none)').forEach(card => {
-                const radios = card.querySelectorAll('input[type="radio"]:not([disabled])');
+            document.querySelectorAll('.att-emp-card').forEach(card => {
+                const radios = card.querySelectorAll('input[type="radio"]');
                 if(radios.length > 0) {
                     const id = radios[0].name.split('_')[1];
                     const nama = card.getAttribute('data-nama');
-                    const checked = card.querySelector(`input[name="st_${id}"]:checked`);
+                    // Hanya submit data yang BARU (tidak disabled)
+                    const checked = card.querySelector(`input[name="st_${id}"]:checked:not(:disabled)`);
                     if(checked) {
                         payloadData.push({ tanggal: date, id: id, nama: nama, dept: dept, grup: group, status: checked.value });
                     }
                 }
             });
 
-            if(payloadData.length === 0) return showModal('info', 'Tidak Ada Data Baru', 'Semua karyawan di kriteria ini sudah memiliki data kehadiran untuk tanggal tersebut.');
+            if(payloadData.length === 0) return showModal('info', 'Tidak Ada Data', 'Tidak ada data kehadiran baru yang dipilih untuk disimpan.');
 
             getEl('loading-overlay').classList.remove('hidden');
             try {
@@ -1162,7 +1185,6 @@
                     payloadData.forEach(p => db.attendance.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Unit": p.dept, "Grup": p.grup, "Status": p.status}));
                     localStorage.setItem(CACHE_KEY, JSON.stringify(db));
                     
-                    // Segarkan list agar yang baru diinput menjadi disabled
                     loadEmployeesForAttendance();
                 } else throw new Error(res.message);
             } catch (err) {
@@ -1194,27 +1216,22 @@
                 let html = '';
                 filtered.forEach(e => {
                     const id = e["Employee ID"];
-
-                    // Cek duplikasi lembur
-                    const existingRecord = db.overtime.find(o => o.Tanggal === date && String(o["Employee ID"]) === String(id));
-                    const isDisabled = existingRecord ? true : false;
-                    const hours = existingRecord ? existingRecord["Jam Lembur"] : '';
-
-                    let disableClass = isDisabled ? 'opacity-60 cursor-not-allowed bg-gray-50 border-gray-200' : 'bg-white border-gray-100 cursor-pointer hover:border-silver-400 hover:shadow-md';
-                    let badge = isDisabled ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-bold px-2 py-0.5 rounded-md ml-2 border border-blue-200 flex-shrink-0"><i class="fas fa-check mr-1"></i>Sudah Input (${hours} Jam)</span>` : '';
-                    let disabledAttr = isDisabled ? 'disabled checked' : '';
-                    let pointerEvents = isDisabled ? 'pointer-events-none' : '';
+                    
+                    // Cek apakah data lembur karyawan ini sudah ada di tanggal yang dipilih
+                    const savedData = db.overtime.find(o => o.Tanggal === date && String(o["Employee ID"]) === String(id));
+                    const isSaved = !!savedData;
+                    const disabledAttr = isSaved ? 'disabled' : '';
+                    const pointerClass = isSaved ? 'cursor-not-allowed opacity-60 bg-gray-50' : 'cursor-pointer bg-white hover:border-silver-400 hover:shadow-md';
+                    const badge = isSaved ? `<span class="ml-auto px-2 py-0.5 bg-green-100 text-green-700 text-[10px] rounded-full font-bold"><i class="fas fa-check"></i> ${savedData["Jam Lembur"]} Jam</span>` : '';
 
                     html += `
-                        <label class="ot-emp-label flex items-center p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all shadow-sm border ${disableClass} ${pointerEvents}">
-                            <input type="checkbox" value="${id}" data-nama="${e["Nama"]}" class="ot-emp-check w-5 h-5 sm:w-6 sm:h-6 text-silver-500 bg-gray-50 border-gray-300 rounded focus:ring-silver-400 mr-3 sm:mr-4" ${disabledAttr}>
-                            <div class="flex flex-col w-full">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-extrabold text-navy-900 text-xs sm:text-sm truncate mr-2">${e["Nama"]}</span>
-                                    ${badge}
-                                </div>
+                        <label class="ot-emp-label flex items-center p-3 sm:p-4 border border-gray-100 rounded-xl sm:rounded-2xl transition-all shadow-sm ${pointerClass}">
+                            <input type="checkbox" value="${id}" data-nama="${e["Nama"]}" class="ot-emp-check w-5 h-5 sm:w-6 sm:h-6 text-silver-500 border-gray-300 rounded focus:ring-silver-400 mr-3 sm:mr-4 ${isSaved ? 'bg-gray-200' : 'bg-gray-50'}" ${disabledAttr}>
+                            <div class="flex flex-col">
+                                <span class="font-extrabold text-navy-900 text-xs sm:text-sm">${e["Nama"]}</span>
                                 <span class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold mt-0.5">ID: ${id}</span>
                             </div>
+                            ${badge}
                         </label>
                     `;
                 });
@@ -1237,8 +1254,8 @@
 
         function toggleAllOvertime() {
             const isChecked = getEl('ot-select-all').checked;
-            // Hanya mencentang yang tidak disabled
-            document.querySelectorAll('.ot-emp-check:not([disabled])').forEach(chk => {
+            // Hanya toggle checkbox yang aktif (belum disubmit sebelumnya)
+            document.querySelectorAll('.ot-emp-check:not(:disabled)').forEach(chk => {
                 if (chk.closest('.ot-emp-label').style.display !== 'none') {
                     chk.checked = isChecked;
                 }
@@ -1257,9 +1274,9 @@
                 return showModal('info', 'Data Belum Lengkap', 'Pilih Tanggal, Unit, dan Grup terlebih dahulu sebelum membagikan.');
             }
 
-            // Hanya membagikan yang dicentang dan tidak disabled (data baru)
-            const checks = document.querySelectorAll('.ot-emp-check:checked:not([disabled])');
-            if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan baru untuk dibagikan.');
+            // Share lembur yang baru saja di ceklis
+            const checks = document.querySelectorAll('.ot-emp-check:checked:not(:disabled)');
+            if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan untuk dibagikan.');
 
             const dateObj = new Date(date);
             const formattedDate = dateObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -1289,9 +1306,9 @@
             
             if(!date || !remarks) return showModal('info', 'Form Tidak Lengkap', 'Pastikan Tanggal dan Keterangan Pekerjaan sudah diisi.');
             
-            // Hanya memproses yang dicentang dan bukan data disable
-            const checks = document.querySelectorAll('.ot-emp-check:checked:not([disabled])');
-            if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan (karyawan yang terpilih mungkin sudah memiliki data lembur di tanggal ini).');
+            // Hanya ambil checkbox yang dicentang dan tidak didisable
+            const checks = document.querySelectorAll('.ot-emp-check:checked:not(:disabled)');
+            if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan baru untuk dilemburkan.');
 
             let payloadData = [];
             checks.forEach(chk => {
@@ -1315,8 +1332,8 @@
                     
                     getEl('ot-remarks').value = '';
                     getEl('ot-select-all').checked = false;
-                    // Segarkan list agar yang baru diinput menjadi disabled
-                    loadEmployeesForOvertime();
+                    
+                    loadEmployeesForOvertime(); // Refresh UI to disable the newly submitted ones
                 } else throw new Error(res.message);
             } catch (err) {
                 showModal('error', 'Gagal', err.message || 'Koneksi ke database gagal.');
