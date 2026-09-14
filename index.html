@@ -266,7 +266,6 @@
                 </div>
             </div>
 
-            <!-- Bagian Kehadiran & Lembur Tetap Sama Secara Tampilan -->
             <div id="view-attendance" class="hidden space-y-4 max-w-6xl mx-auto">
                 <div class="bg-white rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100 overflow-hidden">
                     <!-- Header keterangan -->
@@ -355,7 +354,8 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-5 bg-gray-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100">
                             <div>
                                 <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Tanggal</label>
-                                <input type="date" id="ot-date" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-silver-400 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all">
+                                <!-- Ditambahkan onchange trigger -->
+                                <input type="date" id="ot-date" onchange="loadEmployeesForOvertime()" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-silver-400 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all">
                             </div>
                             <div>
                                 <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Unit</label>
@@ -560,13 +560,11 @@
                 const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
                 
                 if (cachedData && cacheTime && (Date.now() - parseInt(cacheTime) < CACHE_EXPIRY)) {
-                    // Data masih segar di cache, langsung masukkan ke variabel
                     const result = JSON.parse(cachedData);
                     db.employees = result.employees || [];
                     db.attendance = result.attendance || [];
                     db.overtime = result.overtime || [];
                 } else {
-                    // Tarik data di belakang layar saat halaman login terbuka
                     fetch(`${GAS_URL}?action=getAllData`)
                     .then(res => res.json())
                     .then(result => {
@@ -586,7 +584,7 @@
             getEl('att-date').valueAsDate = new Date();
             getEl('ot-date').valueAsDate = new Date();
             generatePeriodeOptions();
-            preloadDataSilently(); // Panggil fungsi preload
+            preloadDataSilently();
         });
 
         function checkLogin() {
@@ -594,19 +592,16 @@
             if(pass === 'admin') {
                 getEl('login-screen').classList.add('opacity-0');
                 
-                // Cek apakah data sudah selesai di-preload
                 const isDataReady = db.employees.length > 0;
 
                 setTimeout(() => {
                     getEl('login-screen').classList.add('hidden');
                     
                     if(isDataReady) {
-                        // Jika data sudah ready, tampilkan langsung (sangat cepat)
                         renderDashboard();
                         if(!getEl('view-reports').classList.contains('hidden')) renderReports();
-                        backgroundSync(); // Tetap sync di background
+                        backgroundSync();
                     } else {
-                        // Jika internet super lambat dan belum sempat ter-preload
                         loadData(false); 
                     }
                 }, 500);
@@ -748,6 +743,9 @@
             
             if(page === 'dashboard') renderDashboard();
             if(page === 'reports') renderReports();
+            // Refresh employee list if navigating to input pages to sync states based on dates
+            if(page === 'attendance') loadEmployeesForAttendance();
+            if(page === 'overtime') loadEmployeesForOvertime();
         }
 
         function showModal(type, title, desc) {
@@ -775,9 +773,7 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        // --- FUNGSI MENAMPILKAN RINCIAN HARI & TANGGAL ---
         function showDetails(empId, empName, type) {
-            // Ambil rentang tanggal dari tampilan yang sedang aktif
             let selectId = 'dash-periode';
             if (!getEl('view-reports').classList.contains('hidden')) {
                 selectId = 'rep-periode';
@@ -794,7 +790,6 @@
                 getEl('detail-subtitle').innerText = 'Rincian Tidak Masuk';
                 const absents = db.attendance.filter(a => String(a["Employee ID"]) === String(empId) && ['ALPHA', 'SAKIT', 'IZIN', 'CUTI'].includes(a.Status) && isDateInRange(a.Tanggal, range.start, range.end));
                 
-                // Urutkan dari tanggal terbaru
                 absents.sort((a, b) => new Date(b.Tanggal) - new Date(a.Tanggal));
 
                 if (absents.length === 0) {
@@ -821,7 +816,6 @@
                 getEl('detail-subtitle').innerText = 'Rincian Lembur';
                 const overtimes = db.overtime.filter(o => String(o["Employee ID"]) === String(empId) && isDateInRange(o.Tanggal, range.start, range.end));
                 
-                // Urutkan dari tanggal terbaru
                 overtimes.sort((a, b) => new Date(b.Tanggal) - new Date(a.Tanggal));
 
                 if (overtimes.length === 0) {
@@ -898,11 +892,9 @@
         }
 
         function drawDashboardWidgets(employees, attendance, range) {
-            // 1. TOP KARYAWAN LEMBUR (Dapat di klik)
             let empOtStats = {};
             db.overtime.filter(o => isDateInRange(o.Tanggal, range.start, range.end)).forEach(o => {
                 let id = o["Employee ID"];
-                // Simpan ID agar bisa dilempar ke fungsi showDetails
                 if(!empOtStats[id]) empOtStats[id] = { id: id, name: o.Nama, dept: o.Unit, grup: o.Grup, hours: 0 };
                 empOtStats[id].hours += parseFloat(o["Jam Lembur"] || 0);
             });
@@ -937,7 +929,6 @@
             }
             getEl('listTopOvertime').innerHTML = otListHTML;
 
-            // 2. TOP ABSEN (A/S/I/C) (Dapat di klik)
             let empAbsence = {};
             attendance.filter(a => ['ALPHA', 'SAKIT', 'IZIN', 'CUTI'].includes(a.Status)).forEach(a => {
                 let id = a["Employee ID"];
@@ -976,7 +967,6 @@
             getEl('listWorstAbsence').innerHTML = listHTML;
         }
 
-        // --- FUNGSI ENTRY ATTENDANCE & OVERTIME ---
         function loadEmployeesForAttendance() {
             const date = getEl('att-date').value;
             const dept = getEl('att-dept').value;
@@ -991,24 +981,9 @@
                 return;
             }
 
-            const isDuplicate = db.attendance.some(a => a.Tanggal === date && a.Unit === dept && a.Grup === group);
-            if(isDuplicate) {
-                grid.innerHTML = `
-                <div class="py-10 sm:py-16 flex flex-col items-center justify-center text-center">
-                    <div class="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-inner">
-                        <i class="fas fa-check text-3xl sm:text-4xl text-green-500"></i>
-                    </div>
-                    <p class="text-navy-900 font-black text-xl sm:text-2xl mb-1 sm:mb-2 tracking-tight">Data Sudah Tersimpan</p>
-                    <p class="text-gray-500 text-xs sm:text-sm max-w-xs sm:max-w-sm">Kehadiran untuk Unit dan grup ini pada tanggal yang dipilih sudah berhasil diinput sebelumnya.</p>
-                </div>`;
-                getEl('att-header-actions').classList.add('hidden');
-                getEl('att-submit-container').classList.add('hidden');
-                container.classList.remove('hidden');
-                return;
-            } else {
-                getEl('att-header-actions').classList.remove('hidden');
-                getEl('att-submit-container').classList.remove('hidden');
-            }
+            // Membuka UI dan menampilkan daftar karyawan secara utuh
+            getEl('att-header-actions').classList.remove('hidden');
+            getEl('att-submit-container').classList.remove('hidden');
             
             let filtered = db.employees.filter(e => e.Unit === dept && e.Grup === group && e.Status === "Aktif");
             
@@ -1018,58 +993,57 @@
                 let html = '';
                 filtered.forEach(e => {
                     const id = e["Employee ID"];
+                    
+                    // Cek duplikasi per karyawan
+                    const existingRecord = db.attendance.find(a => a.Tanggal === date && String(a["Employee ID"]) === String(id));
+                    const isDisabled = existingRecord ? true : false;
+                    const savedStatus = existingRecord ? existingRecord.Status : null;
+
+                    let disableCardClass = isDisabled ? 'opacity-60 pointer-events-none bg-gray-50/50' : 'bg-white hover:shadow-md';
+                    let badgeHTML = isDisabled ? `<span class="bg-green-100 text-green-700 text-[9px] font-bold px-2 py-0.5 rounded-md ml-2 flex-shrink-0 border border-green-200"><i class="fas fa-check mr-1"></i>Sudah Input (${savedStatus})</span>` : '';
+
                     html += `
-                    <div class="att-emp-card bg-white border border-gray-100 rounded-xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2 hover:shadow-md transition-shadow" data-nama="${e["Nama"]}">
+                    <div class="att-emp-card ${disableCardClass} border border-gray-100 rounded-xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2 transition-all" data-nama="${e["Nama"]}">
                         <div>
-                            <div class="font-extrabold text-navy-900 text-sm sm:text-base">${e["Nama"]}</div>
+                            <div class="font-extrabold text-navy-900 text-sm sm:text-base flex items-center">${e["Nama"]} ${badgeHTML}</div>
                             <div class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold mt-0.5">ID: ${id}</div>
                         </div>
-                        <div class="flex flex-wrap gap-1.5 sm:gap-2 sm:w-auto w-full">
-                            <label class="cursor-pointer flex-1 sm:w-[56px]">
-                                <input type="radio" name="st_${id}" value="HADIR" class="att-radio peer hidden" checked>
-                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full bg-gray-50 hover:bg-gray-100 peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
-                                    <span class="block text-xs sm:text-sm"><i class="fas fa-check"></i></span>
-                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Hadir</span>
+                        <div class="flex flex-wrap gap-1.5 sm:gap-2 sm:w-auto w-full">`;
+                    
+                    const statuses = [
+                        {val: 'HADIR', label: 'Hadir', icon: '<i class="fas fa-check"></i>', iconClass: 'text-xs sm:text-sm'},
+                        {val: 'ALPHA', label: 'Alpha', icon: 'A', iconClass: 'text-xs sm:text-sm'},
+                        {val: 'SAKIT', label: 'Sakit', icon: 'S', iconClass: 'text-xs sm:text-sm'},
+                        {val: 'IZIN', label: 'Izin', icon: 'I', iconClass: 'text-xs sm:text-sm'},
+                        {val: 'CUTI', label: 'Cuti', icon: 'C', iconClass: 'text-xs sm:text-sm'},
+                        {val: 'OFF', label: 'Off', icon: 'O', iconClass: 'text-xs sm:text-sm'}
+                    ];
+
+                    statuses.forEach(s => {
+                        let isChecked = '';
+                        if (isDisabled) {
+                            if (savedStatus === s.val) isChecked = 'checked';
+                        } else {
+                            if (s.val === 'HADIR') isChecked = 'checked';
+                        }
+
+                        let disabledAttr = isDisabled ? 'disabled' : '';
+                        let cursorClass = isDisabled ? 'cursor-not-allowed' : 'cursor-pointer';
+                        let checkedBg = isDisabled ? 'peer-checked:bg-gray-400 peer-checked:border-gray-400' : 'peer-checked:bg-navy-900 peer-checked:border-navy-900 hover:bg-gray-100';
+
+                        html += `
+                            <label class="${cursorClass} flex-1 sm:w-[56px]">
+                                <input type="radio" name="st_${id}" value="${s.val}" class="att-radio peer hidden" ${isChecked} ${disabledAttr}>
+                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full bg-gray-50 peer-checked:text-white ${checkedBg}">
+                                    <span class="block ${s.iconClass}">${s.icon}</span>
+                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">${s.label}</span>
                                 </div>
-                            </label>
-                            <label class="cursor-pointer flex-1 sm:w-[56px]">
-                                <input type="radio" name="st_${id}" value="ALPHA" class="att-radio peer hidden">
-                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full bg-gray-50 hover:bg-gray-100 peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
-                                    <span class="block text-xs sm:text-sm">A</span>
-                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Alpha</span>
-                                </div>
-                            </label>
-                            <label class="cursor-pointer flex-1 sm:w-[56px]">
-                                <input type="radio" name="st_${id}" value="SAKIT" class="att-radio peer hidden">
-                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full bg-gray-50 hover:bg-gray-100 peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
-                                    <span class="block text-xs sm:text-sm">S</span>
-                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Sakit</span>
-                                </div>
-                            </label>
-                            <label class="cursor-pointer flex-1 sm:w-[56px]">
-                                <input type="radio" name="st_${id}" value="IZIN" class="att-radio peer hidden">
-                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full bg-gray-50 hover:bg-gray-100 peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
-                                    <span class="block text-xs sm:text-sm">I</span>
-                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Izin</span>
-                                </div>
-                            </label>
-                            <label class="cursor-pointer flex-1 sm:w-[56px]">
-                                <input type="radio" name="st_${id}" value="CUTI" class="att-radio peer hidden">
-                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full bg-gray-50 hover:bg-gray-100 peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
-                                    <span class="block text-xs sm:text-sm">C</span>
-                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Cuti</span>
-                                </div>
-                            </label>
-                            <label class="cursor-pointer flex-1 sm:w-[56px]">
-                                <input type="radio" name="st_${id}" value="OFF" class="att-radio peer hidden">
-                                <div class="text-center px-1 py-1.5 sm:py-2 rounded-lg text-[10px] font-bold border border-gray-200 text-gray-400 transition-all shadow-sm flex flex-col items-center justify-center h-full bg-gray-50 hover:bg-gray-100 peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900">
-                                    <span class="block text-xs sm:text-sm">O</span>
-                                    <span class="text-[7px] sm:text-[8px] uppercase tracking-wide mt-1 block">Off</span>
-                                </div>
-                            </label>
+                            </label>`;
+                    });
+
+                    html += `
                         </div>
-                    </div>
-                    `;
+                    </div>`;
                 });
                 grid.innerHTML = html;
             }
@@ -1087,7 +1061,7 @@
         }
 
         function setAllHadir() {
-            const cards = document.querySelectorAll('.att-emp-card');
+            const cards = document.querySelectorAll('.att-emp-card:not(.pointer-events-none)');
             let count = 0;
             cards.forEach(card => {
                 if(card.style.display !== 'none') {
@@ -1100,7 +1074,8 @@
                     }
                 }
             });
-            if(count > 0) showModal('info', 'Berhasil Direset', `${count} karyawan dikembalikan ke status Hadir.`);
+            if(count > 0) showModal('info', 'Berhasil Direset', `${count} karyawan yang belum diinput dikembalikan ke status Hadir.`);
+            else showModal('info', 'Info', 'Tidak ada karyawan yang dapat direset statusnya.');
         }
 
         function shareWhatsAppAttendance() {
@@ -1113,9 +1088,9 @@
             }
 
             let payloadData = [];
-            document.querySelectorAll('.att-emp-card').forEach(card => {
+            document.querySelectorAll('.att-emp-card:not(.pointer-events-none)').forEach(card => {
                 if(card.style.display !== 'none') { 
-                    const radios = card.querySelectorAll('input[type="radio"]');
+                    const radios = card.querySelectorAll('input[type="radio"]:not([disabled])');
                     if(radios.length > 0) {
                         const id = radios[0].name.split('_')[1];
                         const nama = card.getAttribute('data-nama');
@@ -1127,7 +1102,7 @@
                 }
             });
 
-            if(payloadData.length === 0) return showModal('info', 'Karyawan Kosong', 'Tidak ada data karyawan untuk dibagikan.');
+            if(payloadData.length === 0) return showModal('info', 'Kosong', 'Tidak ada data kehadiran baru untuk dibagikan (semua mungkin sudah diinput sebelumnya).');
 
             const dateObj = new Date(date);
             const formattedDate = dateObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -1159,14 +1134,10 @@
             const group = getEl('att-group').value;
             if(!date) return showModal('info', 'Tanggal Kosong', 'Harap lengkapi tanggal kehadiran.');
             
-            const isDuplicate = db.attendance.some(a => a.Tanggal === date && a.Unit === dept && a.Grup === group);
-            if(isDuplicate) {
-                return showModal('error', 'Data Sudah Tersimpan', 'Kehadiran untuk unit ini pada tanggal tersebut sudah diinput sebelumnya.');
-            }
-            
             let payloadData = [];
-            document.querySelectorAll('.att-emp-card').forEach(card => {
-                const radios = card.querySelectorAll('input[type="radio"]');
+            // Hanya ambil card yang TIDAK didisable
+            document.querySelectorAll('.att-emp-card:not(.pointer-events-none)').forEach(card => {
+                const radios = card.querySelectorAll('input[type="radio"]:not([disabled])');
                 if(radios.length > 0) {
                     const id = radios[0].name.split('_')[1];
                     const nama = card.getAttribute('data-nama');
@@ -1177,7 +1148,7 @@
                 }
             });
 
-            if(payloadData.length === 0) return;
+            if(payloadData.length === 0) return showModal('info', 'Tidak Ada Data Baru', 'Semua karyawan di kriteria ini sudah memiliki data kehadiran untuk tanggal tersebut.');
 
             getEl('loading-overlay').classList.remove('hidden');
             try {
@@ -1191,6 +1162,7 @@
                     payloadData.forEach(p => db.attendance.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Unit": p.dept, "Grup": p.grup, "Status": p.status}));
                     localStorage.setItem(CACHE_KEY, JSON.stringify(db));
                     
+                    // Segarkan list agar yang baru diinput menjadi disabled
                     loadEmployeesForAttendance();
                 } else throw new Error(res.message);
             } catch (err) {
@@ -1201,6 +1173,7 @@
         }
 
         function loadEmployeesForOvertime() {
+            const date = getEl('ot-date').value;
             const dept = getEl('ot-dept').value;
             const group = getEl('ot-group').value;
             const container = getEl('ot-employee-list-container');
@@ -1208,7 +1181,7 @@
             
             if(getEl('ot-search')) getEl('ot-search').value = '';
             
-            if(!dept || !group) {
+            if(!dept || !group || !date) {
                 container.classList.add('hidden');
                 return;
             }
@@ -1220,12 +1193,27 @@
             } else {
                 let html = '';
                 filtered.forEach(e => {
+                    const id = e["Employee ID"];
+
+                    // Cek duplikasi lembur
+                    const existingRecord = db.overtime.find(o => o.Tanggal === date && String(o["Employee ID"]) === String(id));
+                    const isDisabled = existingRecord ? true : false;
+                    const hours = existingRecord ? existingRecord["Jam Lembur"] : '';
+
+                    let disableClass = isDisabled ? 'opacity-60 cursor-not-allowed bg-gray-50 border-gray-200' : 'bg-white border-gray-100 cursor-pointer hover:border-silver-400 hover:shadow-md';
+                    let badge = isDisabled ? `<span class="bg-blue-100 text-blue-700 text-[9px] font-bold px-2 py-0.5 rounded-md ml-2 border border-blue-200 flex-shrink-0"><i class="fas fa-check mr-1"></i>Sudah Input (${hours} Jam)</span>` : '';
+                    let disabledAttr = isDisabled ? 'disabled checked' : '';
+                    let pointerEvents = isDisabled ? 'pointer-events-none' : '';
+
                     html += `
-                        <label class="ot-emp-label flex items-center p-3 sm:p-4 bg-white border border-gray-100 rounded-xl sm:rounded-2xl cursor-pointer hover:border-silver-400 hover:shadow-md transition-all shadow-sm">
-                            <input type="checkbox" value="${e["Employee ID"]}" data-nama="${e["Nama"]}" class="ot-emp-check w-5 h-5 sm:w-6 sm:h-6 text-silver-500 bg-gray-50 border-gray-300 rounded focus:ring-silver-400 mr-3 sm:mr-4">
-                            <div class="flex flex-col">
-                                <span class="font-extrabold text-navy-900 text-xs sm:text-sm">${e["Nama"]}</span>
-                                <span class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold mt-0.5">ID: ${e["Employee ID"]}</span>
+                        <label class="ot-emp-label flex items-center p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all shadow-sm border ${disableClass} ${pointerEvents}">
+                            <input type="checkbox" value="${id}" data-nama="${e["Nama"]}" class="ot-emp-check w-5 h-5 sm:w-6 sm:h-6 text-silver-500 bg-gray-50 border-gray-300 rounded focus:ring-silver-400 mr-3 sm:mr-4" ${disabledAttr}>
+                            <div class="flex flex-col w-full">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-extrabold text-navy-900 text-xs sm:text-sm truncate mr-2">${e["Nama"]}</span>
+                                    ${badge}
+                                </div>
+                                <span class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold mt-0.5">ID: ${id}</span>
                             </div>
                         </label>
                     `;
@@ -1249,7 +1237,8 @@
 
         function toggleAllOvertime() {
             const isChecked = getEl('ot-select-all').checked;
-            document.querySelectorAll('.ot-emp-check').forEach(chk => {
+            // Hanya mencentang yang tidak disabled
+            document.querySelectorAll('.ot-emp-check:not([disabled])').forEach(chk => {
                 if (chk.closest('.ot-emp-label').style.display !== 'none') {
                     chk.checked = isChecked;
                 }
@@ -1268,8 +1257,9 @@
                 return showModal('info', 'Data Belum Lengkap', 'Pilih Tanggal, Unit, dan Grup terlebih dahulu sebelum membagikan.');
             }
 
-            const checks = document.querySelectorAll('.ot-emp-check:checked');
-            if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan untuk dibagikan.');
+            // Hanya membagikan yang dicentang dan tidak disabled (data baru)
+            const checks = document.querySelectorAll('.ot-emp-check:checked:not([disabled])');
+            if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan baru untuk dibagikan.');
 
             const dateObj = new Date(date);
             const formattedDate = dateObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -1299,8 +1289,9 @@
             
             if(!date || !remarks) return showModal('info', 'Form Tidak Lengkap', 'Pastikan Tanggal dan Keterangan Pekerjaan sudah diisi.');
             
-            const checks = document.querySelectorAll('.ot-emp-check:checked');
-            if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan.');
+            // Hanya memproses yang dicentang dan bukan data disable
+            const checks = document.querySelectorAll('.ot-emp-check:checked:not([disabled])');
+            if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan (karyawan yang terpilih mungkin sudah memiliki data lembur di tanggal ini).');
 
             let payloadData = [];
             checks.forEach(chk => {
@@ -1323,8 +1314,9 @@
                     localStorage.setItem(CACHE_KEY, JSON.stringify(db));
                     
                     getEl('ot-remarks').value = '';
-                    checks.forEach(chk => chk.checked = false);
                     getEl('ot-select-all').checked = false;
+                    // Segarkan list agar yang baru diinput menjadi disabled
+                    loadEmployeesForOvertime();
                 } else throw new Error(res.message);
             } catch (err) {
                 showModal('error', 'Gagal', err.message || 'Koneksi ke database gagal.');
@@ -1383,7 +1375,6 @@
 
             let statsArray = Object.values(stats);
 
-            // Tabel Absen - Dapat di Klik
             if(type === 'absen') {
                 let absFilter = document.querySelector('input[name="absType"]:checked').value;
                 htmlHead = `<tr>
@@ -1417,7 +1408,6 @@
                 });
                 if(htmlBody === '') htmlBody = '<tr><td colspan="3" class="px-6 py-8 sm:py-12 text-center text-gray-500 font-bold text-xs sm:text-sm">Data bersih. Tidak ada rekam ketidakhadiran di kriteria ini.</td></tr>';
             } 
-            // Tabel Lembur - Dapat di Klik
             else if(type === 'lembur') {
                 htmlHead = `<tr>
                     <th class="px-4 sm:px-6 py-3 sm:py-4 font-extrabold text-navy-900 text-[10px] sm:text-xs uppercase tracking-wider">Karyawan</th>
@@ -1437,7 +1427,6 @@
                 });
                 if(htmlBody === '') htmlBody = '<tr><td colspan="3" class="px-6 py-8 sm:py-12 text-center text-gray-500 font-bold text-xs sm:text-sm">Tidak ada rekam lembur di periode ini.</td></tr>';
             }
-            // Tabel Lengkap - Tampilan Tetap
             else { 
                 htmlHead = `<tr>
                     <th class="px-4 sm:px-6 py-3 sm:py-4 font-extrabold text-navy-900 text-[10px] sm:text-xs uppercase tracking-wider">Karyawan</th>
@@ -1482,4 +1471,3 @@
     </script>
 </body>
 </html>
-```eof
