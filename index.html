@@ -13,6 +13,7 @@
     <link rel="apple-touch-icon" href="https://www.image2url.com/r2/default/files/1788936510369-c0ffe90d-a6fe-4927-8de2-0b3aecf23b58.png">
     
     <title>MPP Apps Professional</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
@@ -54,6 +55,7 @@
             }
         }
     </script>
+    
     <style>
         body { 
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
@@ -613,9 +615,16 @@
             }
         }
 
+        // Fitur Pembuatan Periode Cutoff + Tanggal 16 Shift Next Month
         function generatePeriodeOptions() {
             const selects = [getEl('dash-periode'), getEl('rep-periode')];
             let today = new Date();
+            
+            // Jika tanggal 16 atau lebih, default bulan bergeser ke bulan depan (Periode Cutoff Baru)
+            if (today.getDate() >= 16) {
+                today.setMonth(today.getMonth() + 1);
+            }
+
             let optionsHTML = '';
             const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
@@ -864,6 +873,32 @@
             };
         }
         
+        // Helper: Mengecek apakah string date raw dari Database cocok dengan string Date dari UI Input (YYYY-MM-DD)
+        const isSameDate = (dbDate, inputDate) => {
+            if (!dbDate || !inputDate) return false;
+            let d1 = String(dbDate).trim();
+            let d2 = String(inputDate).trim();
+            
+            // 1. Coba string exact match
+            if (d1 === d2) return true;
+            
+            try {
+                // 2. Coba parse object JS Date untuk normalisasi (jika format raw ada tambahan time Z / +07:00)
+                const d = new Date(d1);
+                if (!isNaN(d.getTime())) {
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    if (`${year}-${month}-${day}` === d2) return true;
+                }
+            } catch(e) {}
+            
+            // 3. Fallback: Potong bagian T pada format ISO string (contoh 2024-09-14T00:00:00Z)
+            if (d1.includes('T') && d1.split('T')[0] === d2) return true;
+            
+            return false;
+        };
+        
         function isDateInRange(dateString, startTs, endTs) {
             let dTs = new Date(dateString).getTime();
             return dTs >= startTs && dTs <= endTs;
@@ -992,8 +1027,9 @@
                 filtered.forEach(e => {
                     const id = e["Employee ID"];
                     
-                    // Cek apakah data karyawan ini sudah ada di tanggal yang dipilih
-                    const savedData = db.attendance.find(a => a.Tanggal === date && String(a["Employee ID"]) === String(id));
+                    // Cek Database dengan String yang Di-Trim dan menggunakan isSameDate Helper (Fix Isu Tanggal)
+                    const checkId = String(id).trim();
+                    const savedData = db.attendance.find(a => isSameDate(a.Tanggal, date) && String(a["Employee ID"]).trim() === checkId);
                     const isSaved = !!savedData;
                     
                     let stHadir = '', stAlpha = '', stSakit = '', stIzin = '', stCuti = '', stOff = '';
@@ -1217,8 +1253,10 @@
                 filtered.forEach(e => {
                     const id = e["Employee ID"];
                     
-                    // Cek apakah data lembur karyawan ini sudah ada di tanggal yang dipilih
-                    const savedData = db.overtime.find(o => o.Tanggal === date && String(o["Employee ID"]) === String(id));
+                    // Cek Database Lembur dengan Helper isSameDate yang Presisi
+                    const checkId = String(id).trim();
+                    const savedData = db.overtime.find(o => isSameDate(o.Tanggal, date) && String(o["Employee ID"]).trim() === checkId);
+                    
                     const isSaved = !!savedData;
                     const disabledAttr = isSaved ? 'disabled' : '';
                     const pointerClass = isSaved ? 'cursor-not-allowed opacity-60 bg-gray-50' : 'cursor-pointer bg-white hover:border-silver-400 hover:shadow-md';
@@ -1470,7 +1508,7 @@
                                 ${persentase}%
                             </span>
                         </td>
-                        <td class="px-4 sm:px-6 py-3 sm:py-4 text-center text-[9px] sm:text-[10px]">
+                        <td class="px-4 sm:px-6 py-3 py-4 text-center text-[9px] sm:text-[10px]">
                             <div class="flex justify-center gap-1 sm:gap-2 bg-gray-50 p-1.5 sm:p-2 rounded-lg sm:rounded-xl border border-gray-100 inline-flex">
                                 <span class="font-bold text-navy-900 px-0.5 sm:px-1" title="Hadir">H:${s.hadir}</span>
                                 <span class="font-bold text-red-500 px-0.5 sm:px-1" title="Alpha">A:${s.alpha}</span>
