@@ -195,7 +195,7 @@
 
         <div id="loading-overlay" class="absolute inset-0 bg-slate-50/80 backdrop-blur-md z-40 flex flex-col items-center justify-center hidden rounded-3xl m-4">
             <div class="loader-ring mb-4"></div>
-            <p class="text-navy-900 font-bold tracking-wide animate-pulse">Sinkronisasi Data...</p>
+            <p class="text-navy-900 font-bold tracking-wide animate-pulse">Memproses Data...</p>
         </div>
 
         <div class="flex-1 overflow-y-auto px-3 sm:px-4 md:px-8 pb-24 custom-scrollbar">
@@ -335,7 +335,7 @@
                                 <button onclick="shareWhatsAppAttendance()" class="flex-1 sm:flex-none sm:w-auto bg-[#25D366] hover:bg-[#128C7E] text-white px-3 sm:px-5 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm font-bold transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-xs sm:text-sm">
                                     <i class="fab fa-whatsapp text-sm sm:text-base"></i> Share WA
                                 </button>
-                                <button onclick="submitAttendance()" class="flex-1 sm:flex-none sm:w-auto bg-gradient-to-r from-navy-900 to-navy-800 hover:from-navy-800 hover:to-navy-700 text-white px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm hover:shadow font-bold transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-xs sm:text-sm">
+                                <button id="btn-submit-att" onclick="submitAttendance()" class="flex-1 sm:flex-none sm:w-auto bg-gradient-to-r from-navy-900 to-navy-800 hover:from-navy-800 hover:to-navy-700 text-white px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm hover:shadow font-bold transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-xs sm:text-sm">
                                     <i class="fas fa-save text-sm"></i> Simpan Data
                                 </button>
                             </div>
@@ -421,7 +421,7 @@
                                 <button onclick="shareWhatsApp()" class="flex-1 sm:flex-none sm:w-auto bg-[#25D366] hover:bg-[#128C7E] text-white px-3 sm:px-5 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm font-bold transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-xs sm:text-sm">
                                     <i class="fab fa-whatsapp text-sm sm:text-base"></i> Share WA
                                 </button>
-                                <button onclick="submitOvertime()" class="flex-1 sm:flex-none sm:w-auto bg-gradient-to-r from-silver-400 to-silver-500 hover:from-silver-500 hover:to-silver-600 text-white px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm hover:shadow font-bold transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-xs sm:text-sm">
+                                <button id="btn-submit-ot" onclick="submitOvertime()" class="flex-1 sm:flex-none sm:w-auto bg-gradient-to-r from-silver-400 to-silver-500 hover:from-silver-500 hover:to-silver-600 text-white px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm hover:shadow font-bold transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-xs sm:text-sm">
                                     <i class="fas fa-save text-sm"></i> Simpan Data
                                 </button>
                             </div>
@@ -1194,20 +1194,46 @@
             if(!date) return showModal('info', 'Tanggal Kosong', 'Harap lengkapi tanggal kehadiran.');
             
             let payloadData = [];
+            let duplicateNames = [];
+
             document.querySelectorAll('.att-emp-card').forEach(card => {
                 const radios = card.querySelectorAll('input[type="radio"]');
                 if(radios.length > 0) {
                     const id = radios[0].name.split('_')[1];
                     const nama = card.getAttribute('data-nama');
-                    // Hanya submit data yang BARU (tidak disabled)
+                    
+                    // Hanya memproses data yang BARU (tidak di-disable)
                     const checked = card.querySelector(`input[name="st_${id}"]:checked:not(:disabled)`);
+                    
                     if(checked) {
-                        payloadData.push({ tanggal: date, id: id, nama: nama, dept: dept, grup: group, status: checked.value });
+                        // Double check / Validasi Berlapis: Pastikan ID ini belum tercatat di database lokal di tanggal ini
+                        const isAlreadySaved = db.attendance.some(a => isSameDate(a.Tanggal, date) && String(a["Employee ID"]).trim() === String(id).trim());
+
+                        if (isAlreadySaved) {
+                            duplicateNames.push(nama); // Catat yang terduplikat
+                        } else {
+                            payloadData.push({ tanggal: date, id: id, nama: nama, dept: dept, grup: group, status: checked.value });
+                        }
                     }
                 }
             });
 
+            if (duplicateNames.length > 0) {
+                if (payloadData.length === 0) {
+                    return showModal('error', 'Gagal Disimpan', 'Semua karyawan yang Anda pilih sudah memiliki data kehadiran pada tanggal tersebut.');
+                } else {
+                    return showModal('error', 'Terdapat Data Ganda', 'Beberapa karyawan sudah memiliki data kehadiran: ' + duplicateNames.slice(0,3).join(', ') + (duplicateNames.length > 3 ? '...' : '') + '. Silakan muat ulang halaman untuk melihat status terbaru.');
+                }
+            }
+
             if(payloadData.length === 0) return showModal('info', 'Tidak Ada Data', 'Tidak ada data kehadiran baru yang dipilih untuk disimpan.');
+
+            // Disabled tombol sementara (Anti-spam click)
+            const submitBtn = getEl('btn-submit-att');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
 
             getEl('loading-overlay').classList.remove('hidden');
             try {
@@ -1227,6 +1253,10 @@
                 showModal('error', 'Gagal', err.message || 'Koneksi ke database gagal.');
             } finally {
                 getEl('loading-overlay').classList.add('hidden');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
             }
         }
 
@@ -1344,17 +1374,47 @@
             
             if(!date || !remarks) return showModal('info', 'Form Tidak Lengkap', 'Pastikan Tanggal dan Keterangan Pekerjaan sudah diisi.');
             
-            // Hanya ambil checkbox yang dicentang dan tidak didisable
+            // Hanya ambil checkbox yang dicentang dan tidak didisable oleh sistem
             const checks = document.querySelectorAll('.ot-emp-check:checked:not(:disabled)');
             if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan baru untuk dilemburkan.');
 
             let payloadData = [];
+            let duplicateNames = [];
+
             checks.forEach(chk => {
-                payloadData.push({
-                    tanggal: date, id: chk.value, nama: chk.getAttribute('data-nama'),
-                    dept: dept, grup: group, jamLembur: parseFloat(hours), keterangan: remarks
-                });
+                const empId = chk.value;
+                const empName = chk.getAttribute('data-nama');
+                
+                // Double check / Validasi Berlapis (Mencegah Double Input)
+                // Pengecekan ekstra langsung ke array db lokal sebelum merangkai data yang akan dikirim
+                const isAlreadySaved = db.overtime.some(o => isSameDate(o.Tanggal, date) && String(o["Employee ID"]).trim() === String(empId).trim());
+
+                if (isAlreadySaved) {
+                    // Masukkan ke array jika ternyata ID sudah terekam di tanggal tersebut 
+                    duplicateNames.push(empName);
+                } else {
+                    payloadData.push({
+                        tanggal: date, id: empId, nama: empName,
+                        dept: dept, grup: group, jamLembur: parseFloat(hours), keterangan: remarks
+                    });
+                }
             });
+
+            // Jika ada nama yang terdeteksi ganda, batalkan pengiriman
+            if (duplicateNames.length > 0) {
+                if (payloadData.length === 0) {
+                    return showModal('error', 'Gagal Disimpan', 'Semua karyawan yang Anda pilih sudah memiliki data lembur pada tanggal tersebut. Silakan muat ulang halaman.');
+                } else {
+                    return showModal('error', 'Terdapat Data Ganda', 'Penyimpanan digagalkan. Beberapa karyawan sudah diinput lemburnya: ' + duplicateNames.slice(0,3).join(', ') + (duplicateNames.length > 3 ? '...' : '') + '. Silakan muat ulang halaman untuk memperbarui status.');
+                }
+            }
+
+            // Disabled tombol sementara (Anti-spam click / double klik)
+            const submitBtn = getEl('btn-submit-ot');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            }
 
             getEl('loading-overlay').classList.remove('hidden');
             try {
@@ -1377,6 +1437,10 @@
                 showModal('error', 'Gagal', err.message || 'Koneksi ke database gagal.');
             } finally {
                 getEl('loading-overlay').classList.add('hidden');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
             }
         }
 
