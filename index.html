@@ -421,7 +421,7 @@
                                 <button onclick="shareWhatsApp()" class="flex-1 sm:flex-none sm:w-auto bg-[#25D366] hover:bg-[#128C7E] text-white px-3 sm:px-5 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm font-bold transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-xs sm:text-sm">
                                     <i class="fab fa-whatsapp text-sm sm:text-base"></i> Share WA
                                 </button>
-                                <button id="btn-submit-ot" onclick="submitOvertime()" class="flex-1 sm:flex-none sm:w-auto bg-gradient-to-r from-silver-400 to-silver-500 hover:from-silver-500 hover:to-silver-600 text-white px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm hover:shadow font-bold transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-xs sm:text-sm">
+                                <button id="btn-submit-ot" onclick="submitOvertime()" class="flex-1 sm:flex-none sm:w-auto bg-gradient-to-r from-silver-400 to-silver-500 hover:from-silver-500 hover:to-silver-600 text-white px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm hover:shadow font-bold transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-xs sm:text-sm hidden">
                                     <i class="fas fa-save text-sm"></i> Simpan Data
                                 </button>
                             </div>
@@ -436,7 +436,7 @@
                         <div class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center mr-2"><i class="fas fa-filter text-sm"></i></div>
                         Filter Analisis Data
                     </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
                         <div>
                             <label class="block text-[10px] sm:text-xs font-bold text-gray-500 mb-1 sm:mb-2 uppercase tracking-wide">Periode Bulan</label>
                             <select id="rep-periode" class="w-full bg-gray-50 border-0 text-navy-900 text-xs sm:text-sm rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 p-2.5 sm:p-3 font-bold shadow-inner cursor-pointer" onchange="renderReports()"></select>
@@ -444,7 +444,7 @@
                         <div>
                             <label class="block text-[10px] sm:text-xs font-bold text-gray-500 mb-1 sm:mb-2 uppercase tracking-wide">Tipe Rekap</label>
                             <select id="rep-type" class="w-full bg-gray-50 border-0 text-navy-900 text-xs sm:text-sm rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 p-2.5 sm:p-3 font-bold shadow-inner cursor-pointer" onchange="handleReportTypeChange()">
-                                <option value="lengkap">Ringkasan Total (H/A/S/I/C)</option>
+                                <option value="lengkap">Ringkasan Total (H/A/S/I/C/O)</option>
                                 <option value="absen">Detail Tidak Masuk (Klik untuk Rincian)</option>
                                 <option value="lembur">Detail Jam Lembur (Klik untuk Rincian)</option>
                             </select>
@@ -469,6 +469,13 @@
                                 <option value="Grup C">Grup C</option>
                                 <option value="NON SHIFT">NON SHIFT</option>
                             </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] sm:text-xs font-bold text-gray-500 mb-1 sm:mb-2 uppercase tracking-wide">Cari Nama</label>
+                            <div class="relative w-full">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs sm:text-sm"></i>
+                                <input type="text" id="rep-search" onkeyup="renderReports()" placeholder="Ketik nama..." class="w-full pl-9 pr-3 py-2 sm:py-2.5 bg-gray-50 border-0 rounded-lg sm:rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 font-bold shadow-inner transition-shadow h-[38px] sm:h-[44px]">
+                            </div>
                         </div>
                     </div>
 
@@ -615,12 +622,10 @@
             }
         }
 
-        // Fitur Pembuatan Periode Cutoff + Tanggal 16 Shift Next Month
         function generatePeriodeOptions() {
             const selects = [getEl('dash-periode'), getEl('rep-periode')];
             let today = new Date();
             
-            // Jika tanggal 16 atau lebih, default bulan bergeser ke bulan depan (Periode Cutoff Baru)
             if (today.getDate() >= 16) {
                 today.setMonth(today.getMonth() + 1);
             }
@@ -873,17 +878,14 @@
             };
         }
         
-        // Helper: Mengecek apakah string date raw dari Database cocok dengan string Date dari UI Input (YYYY-MM-DD)
         const isSameDate = (dbDate, inputDate) => {
             if (!dbDate || !inputDate) return false;
             let d1 = String(dbDate).trim();
             let d2 = String(inputDate).trim();
             
-            // 1. Coba string exact match
             if (d1 === d2) return true;
             
             try {
-                // 2. Coba parse object JS Date untuk normalisasi (jika format raw ada tambahan time Z / +07:00)
                 const d = new Date(d1);
                 if (!isNaN(d.getTime())) {
                     const year = d.getFullYear();
@@ -893,7 +895,6 @@
                 }
             } catch(e) {}
             
-            // 3. Fallback: Potong bagian T pada format ISO string (contoh 2024-09-14T00:00:00Z)
             if (d1.includes('T') && d1.split('T')[0] === d2) return true;
             
             return false;
@@ -1019,6 +1020,7 @@
             getEl('att-submit-container').classList.remove('hidden');
             
             let filtered = db.employees.filter(e => e.Unit === dept && e.Grup === group && e.Status === "Aktif");
+            let hasUnsaved = false;
             
             if(filtered.length === 0) {
                 grid.innerHTML = '<div class="py-6 sm:py-8 text-center text-gray-500 font-bold text-sm">Tidak ada karyawan di kriteria ini.</div>';
@@ -1027,10 +1029,11 @@
                 filtered.forEach(e => {
                     const id = e["Employee ID"];
                     
-                    // Cek Database dengan String yang Di-Trim dan menggunakan isSameDate Helper (Fix Isu Tanggal)
                     const checkId = String(id).trim();
                     const savedData = db.attendance.find(a => isSameDate(a.Tanggal, date) && String(a["Employee ID"]).trim() === checkId);
                     const isSaved = !!savedData;
+                    
+                    if (!isSaved) hasUnsaved = true;
                     
                     let stHadir = '', stAlpha = '', stSakit = '', stIzin = '', stCuti = '', stOff = '';
                     if (isSaved) {
@@ -1041,7 +1044,7 @@
                         else if(savedData.Status === 'CUTI') stCuti = 'checked';
                         else if(savedData.Status === 'OFF') stOff = 'checked';
                     } else {
-                        stHadir = 'checked'; // Default untuk yang belum disubmit
+                        stHadir = 'checked'; 
                     }
 
                     const disabledAttr = isSaved ? 'disabled' : '';
@@ -1105,6 +1108,16 @@
                 });
                 grid.innerHTML = html;
             }
+            
+            const btnSubmitAtt = getEl('btn-submit-att');
+            if (btnSubmitAtt) {
+                if (!hasUnsaved) {
+                    btnSubmitAtt.classList.add('hidden');
+                } else {
+                    btnSubmitAtt.classList.remove('hidden');
+                }
+            }
+            
             container.classList.remove('hidden');
         }
 
@@ -1123,7 +1136,6 @@
             let count = 0;
             cards.forEach(card => {
                 if(card.style.display !== 'none') {
-                    // Hanya set hadir jika inputnya belum di-disable (belum disubmit sebelumnya)
                     const radio = card.querySelector('input[value="HADIR"]:not(:disabled)');
                     if(radio) { 
                         radio.checked = true; 
@@ -1145,23 +1157,11 @@
                 return showModal('info', 'Data Belum Lengkap', 'Pilih Tanggal, Unit, dan Grup terlebih dahulu sebelum membagikan data.');
             }
 
-            let payloadData = [];
-            document.querySelectorAll('.att-emp-card').forEach(card => {
-                if(card.style.display !== 'none') { 
-                    const radios = card.querySelectorAll('input[type="radio"]');
-                    if(radios.length > 0) {
-                        const id = radios[0].name.split('_')[1];
-                        const nama = card.getAttribute('data-nama');
-                        // Ambil yang ter-check, baik disabled maupun enabled, agar semua tampil di laporan share WA
-                        const checked = card.querySelector(`input[name="st_${id}"]:checked`);
-                        if(checked) {
-                            payloadData.push({ id: id, nama: nama, status: checked.value });
-                        }
-                    }
-                }
-            });
+            const savedData = db.attendance.filter(a => isSameDate(a.Tanggal, date) && a.Unit === dept && a.Grup === group);
 
-            if(payloadData.length === 0) return showModal('info', 'Karyawan Kosong', 'Tidak ada data karyawan untuk dibagikan.');
+            if(savedData.length === 0) {
+                return showModal('info', 'Tidak Ada Data Tersimpan', 'Belum ada data kehadiran yang tersimpan di sistem untuk pencarian ini.');
+            }
 
             const dateObj = new Date(date);
             const formattedDate = dateObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -1172,15 +1172,15 @@
             text += `Grup: ${group}\n`;
             text += `\n*Rincian Kehadiran:*\n`;
 
-            payloadData.forEach((p, index) => {
+            savedData.forEach((p, index) => {
                 let statusEmoji = "✅";
-                if(p.status === "ALPHA") statusEmoji = "❌";
-                else if(p.status === "SAKIT") statusEmoji = "🤒";
-                else if(p.status === "IZIN") statusEmoji = "ℹ️";
-                else if(p.status === "CUTI") statusEmoji = "🏖️";
-                else if(p.status === "OFF") statusEmoji = "📴";
+                if(p.Status === "ALPHA") statusEmoji = "❌";
+                else if(p.Status === "SAKIT") statusEmoji = "🤒";
+                else if(p.Status === "IZIN") statusEmoji = "ℹ️";
+                else if(p.Status === "CUTI") statusEmoji = "🏖️";
+                else if(p.Status === "OFF") statusEmoji = "📴";
 
-                text += `${index + 1}. ${p.id} - ${p.nama} : *${p.status}* ${statusEmoji}\n`;
+                text += `${index + 1}. ${p["Employee ID"]} - ${p.Nama} : *${p.Status}* ${statusEmoji}\n`;
             });
 
             const encodedText = encodeURIComponent(text);
@@ -1202,15 +1202,13 @@
                     const id = radios[0].name.split('_')[1];
                     const nama = card.getAttribute('data-nama');
                     
-                    // Hanya memproses data yang BARU (tidak di-disable)
                     const checked = card.querySelector(`input[name="st_${id}"]:checked:not(:disabled)`);
                     
                     if(checked) {
-                        // Double check / Validasi Berlapis: Pastikan ID ini belum tercatat di database lokal di tanggal ini
                         const isAlreadySaved = db.attendance.some(a => isSameDate(a.Tanggal, date) && String(a["Employee ID"]).trim() === String(id).trim());
 
                         if (isAlreadySaved) {
-                            duplicateNames.push(nama); // Catat yang terduplikat
+                            duplicateNames.push(nama); 
                         } else {
                             payloadData.push({ tanggal: date, id: id, nama: nama, dept: dept, grup: group, status: checked.value });
                         }
@@ -1228,7 +1226,6 @@
 
             if(payloadData.length === 0) return showModal('info', 'Tidak Ada Data', 'Tidak ada data kehadiran baru yang dipilih untuk disimpan.');
 
-            // Disabled tombol sementara (Anti-spam click)
             const submitBtn = getEl('btn-submit-att');
             if (submitBtn) {
                 submitBtn.disabled = true;
@@ -1243,11 +1240,12 @@
                 });
                 const res = await response.json();
                 if(res.status === 'success') {
-                    showModal('success', 'Berhasil Disimpan', `${payloadData.length} data kehadiran terekam ke sistem.`);
                     payloadData.forEach(p => db.attendance.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Unit": p.dept, "Grup": p.grup, "Status": p.status}));
                     localStorage.setItem(CACHE_KEY, JSON.stringify(db));
                     
                     loadEmployeesForAttendance();
+                    shareWhatsAppAttendance();
+
                 } else throw new Error(res.message);
             } catch (err) {
                 showModal('error', 'Gagal', err.message || 'Koneksi ke database gagal.');
@@ -1275,6 +1273,7 @@
             }
             
             let filtered = db.employees.filter(e => e.Unit === dept && e.Grup === group && e.Status === "Aktif");
+            let hasUnsaved = false;
             
             if(filtered.length === 0) {
                 grid.innerHTML = '<div class="col-span-full py-6 sm:py-8 text-center text-gray-500 font-bold text-sm">Tidak ada karyawan di kriteria ini.</div>';
@@ -1283,18 +1282,19 @@
                 filtered.forEach(e => {
                     const id = e["Employee ID"];
                     
-                    // Cek Database Lembur dengan Helper isSameDate yang Presisi
                     const checkId = String(id).trim();
                     const savedData = db.overtime.find(o => isSameDate(o.Tanggal, date) && String(o["Employee ID"]).trim() === checkId);
                     
                     const isSaved = !!savedData;
+                    if (!isSaved) hasUnsaved = true;
+
                     const disabledAttr = isSaved ? 'disabled' : '';
                     const pointerClass = isSaved ? 'cursor-not-allowed opacity-60 bg-gray-50' : 'cursor-pointer bg-white hover:border-silver-400 hover:shadow-md';
                     const badge = isSaved ? `<span class="ml-auto px-2 py-0.5 bg-green-100 text-green-700 text-[10px] rounded-full font-bold"><i class="fas fa-check"></i> ${savedData["Jam Lembur"]} Jam</span>` : '';
 
                     html += `
                         <label class="ot-emp-label flex items-center p-3 sm:p-4 border border-gray-100 rounded-xl sm:rounded-2xl transition-all shadow-sm ${pointerClass}">
-                            <input type="checkbox" value="${id}" data-nama="${e["Nama"]}" class="ot-emp-check w-5 h-5 sm:w-6 sm:h-6 text-silver-500 border-gray-300 rounded focus:ring-silver-400 mr-3 sm:mr-4 ${isSaved ? 'bg-gray-200' : 'bg-gray-50'}" ${disabledAttr}>
+                            <input type="checkbox" value="${id}" data-nama="${e["Nama"]}" class="ot-emp-check w-5 h-5 sm:w-6 sm:h-6 text-silver-500 border-gray-300 rounded focus:ring-silver-400 mr-3 sm:mr-4 ${isSaved ? 'bg-gray-200' : 'bg-gray-50'}" onchange="checkOvertimeSelection()" ${disabledAttr}>
                             <div class="flex flex-col">
                                 <span class="font-extrabold text-navy-900 text-xs sm:text-sm">${e["Nama"]}</span>
                                 <span class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold mt-0.5">ID: ${id}</span>
@@ -1305,6 +1305,10 @@
                 });
                 grid.innerHTML = html;
             }
+            
+            // Evaluasi tombol simpan sesuai request: tersembunyi hingga ada yg di klik
+            checkOvertimeSelection();
+            
             getEl('ot-select-all').checked = false;
             container.classList.remove('hidden');
         }
@@ -1322,29 +1326,39 @@
 
         function toggleAllOvertime() {
             const isChecked = getEl('ot-select-all').checked;
-            // Hanya toggle checkbox yang aktif (belum disubmit sebelumnya)
             document.querySelectorAll('.ot-emp-check:not(:disabled)').forEach(chk => {
                 if (chk.closest('.ot-emp-label').style.display !== 'none') {
                     chk.checked = isChecked;
                 }
             });
+            checkOvertimeSelection();
+        }
+
+        // Logic Baru: Evaluasi status tombol Simpan Lembur 
+        function checkOvertimeSelection() {
+            const checks = document.querySelectorAll('.ot-emp-check:checked:not(:disabled)');
+            const btnSubmitOt = getEl('btn-submit-ot');
+            if (btnSubmitOt) {
+                if (checks.length > 0) {
+                    btnSubmitOt.classList.remove('hidden');
+                } else {
+                    btnSubmitOt.classList.add('hidden');
+                }
+            }
         }
         
         function shareWhatsApp() {
             const date = getEl('ot-date').value;
             const dept = getEl('ot-dept').value;
             const group = getEl('ot-group').value;
-            const remarks = getEl('ot-remarks').value || 'Tidak ada keterangan';
-            const hoursEl = getEl('ot-hours');
-            const hours = hoursEl.options[hoursEl.selectedIndex].text;
             
             if(!date || !dept || !group) {
                 return showModal('info', 'Data Belum Lengkap', 'Pilih Tanggal, Unit, dan Grup terlebih dahulu sebelum membagikan.');
             }
 
-            // Share lembur yang baru saja di ceklis
-            const checks = document.querySelectorAll('.ot-emp-check:checked:not(:disabled)');
-            if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan untuk dibagikan.');
+            const savedData = db.overtime.filter(o => isSameDate(o.Tanggal, date) && o.Unit === dept && o.Grup === group);
+
+            if(savedData.length === 0) return showModal('info', 'Tidak Ada Data Tersimpan', 'Belum ada data lembur yang tersimpan untuk filter ini.');
 
             const dateObj = new Date(date);
             const formattedDate = dateObj.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -1353,12 +1367,10 @@
             text += `Tanggal: ${formattedDate}\n`;
             text += `Unit: ${dept}\n`;
             text += `Grup: ${group}\n`;
-            text += `Durasi: ${hours}\n`;
-            text += `Keterangan: ${remarks}\n`;
-            text += `\n*Daftar Karyawan:*\n`;
+            text += `\n*Rincian Lembur:*\n`;
 
-            checks.forEach((chk, index) => {
-                text += `${index + 1}. ${chk.value} - ${chk.getAttribute('data-nama')}\n`;
+            savedData.forEach((o, index) => {
+                text += `${index + 1}. ${o["Employee ID"]} - ${o.Nama} (*${o["Jam Lembur"]} Jam*)\n    Ket: ${o.Keterangan}\n`;
             });
 
             const encodedText = encodeURIComponent(text);
@@ -1374,7 +1386,6 @@
             
             if(!date || !remarks) return showModal('info', 'Form Tidak Lengkap', 'Pastikan Tanggal dan Keterangan Pekerjaan sudah diisi.');
             
-            // Hanya ambil checkbox yang dicentang dan tidak didisable oleh sistem
             const checks = document.querySelectorAll('.ot-emp-check:checked:not(:disabled)');
             if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan baru untuk dilemburkan.');
 
@@ -1385,12 +1396,9 @@
                 const empId = chk.value;
                 const empName = chk.getAttribute('data-nama');
                 
-                // Double check / Validasi Berlapis (Mencegah Double Input)
-                // Pengecekan ekstra langsung ke array db lokal sebelum merangkai data yang akan dikirim
                 const isAlreadySaved = db.overtime.some(o => isSameDate(o.Tanggal, date) && String(o["Employee ID"]).trim() === String(empId).trim());
 
                 if (isAlreadySaved) {
-                    // Masukkan ke array jika ternyata ID sudah terekam di tanggal tersebut 
                     duplicateNames.push(empName);
                 } else {
                     payloadData.push({
@@ -1400,7 +1408,6 @@
                 }
             });
 
-            // Jika ada nama yang terdeteksi ganda, batalkan pengiriman
             if (duplicateNames.length > 0) {
                 if (payloadData.length === 0) {
                     return showModal('error', 'Gagal Disimpan', 'Semua karyawan yang Anda pilih sudah memiliki data lembur pada tanggal tersebut. Silakan muat ulang halaman.');
@@ -1409,7 +1416,6 @@
                 }
             }
 
-            // Disabled tombol sementara (Anti-spam click / double klik)
             const submitBtn = getEl('btn-submit-ot');
             if (submitBtn) {
                 submitBtn.disabled = true;
@@ -1424,14 +1430,16 @@
                 });
                 const res = await response.json();
                 if(res.status === 'success') {
-                    showModal('success', 'Lembur Disimpan', `${payloadData.length} data lembur berhasil direkam.`);
                     payloadData.forEach(p => db.overtime.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Unit": p.dept, "Grup": p.grup, "Jam Lembur": p.jamLembur, "Keterangan": p.keterangan}));
                     localStorage.setItem(CACHE_KEY, JSON.stringify(db));
                     
                     getEl('ot-remarks').value = '';
                     getEl('ot-select-all').checked = false;
                     
-                    loadEmployeesForOvertime(); // Refresh UI to disable the newly submitted ones
+                    loadEmployeesForOvertime(); 
+
+                    shareWhatsApp();
+
                 } else throw new Error(res.message);
             } catch (err) {
                 showModal('error', 'Gagal', err.message || 'Koneksi ke database gagal.');
@@ -1472,7 +1480,7 @@
             }).forEach(e => {
                 stats[e["Employee ID"]] = {
                     id: e["Employee ID"], name: e["Nama"], dept: e["Unit"], grup: e["Grup"],
-                    hadir: 0, alpha: 0, sakit: 0, izin: 0, cuti: 0, jamLembur: 0
+                    hadir: 0, alpha: 0, sakit: 0, izin: 0, cuti: 0, off: 0, jamLembur: 0
                 };
             });
             
@@ -1484,6 +1492,7 @@
                     else if(a.Status === 'SAKIT') s.sakit++;
                     else if(a.Status === 'IZIN') s.izin++;
                     else if(a.Status === 'CUTI') s.cuti++;
+                    else if(a.Status === 'OFF') s.off++;
                 }
             });
             
@@ -1493,6 +1502,11 @@
             });
 
             let statsArray = Object.values(stats);
+            
+            const searchQ = getEl('rep-search').value.toLowerCase();
+            if (searchQ) {
+                statsArray = statsArray.filter(s => s.name.toLowerCase().includes(searchQ) || String(s.id).toLowerCase().includes(searchQ));
+            }
 
             if(type === 'absen') {
                 let absFilter = document.querySelector('input[name="absType"]:checked').value;
@@ -1525,7 +1539,7 @@
                         <td class="px-4 sm:px-6 py-3 sm:py-4 text-center text-[10px] sm:text-xs font-semibold text-gray-600"><span class="bg-gray-50 border border-gray-100 px-2 py-1 rounded-md">${s.dept} - ${s.grup}</span></td>
                     </tr>`;
                 });
-                if(htmlBody === '') htmlBody = '<tr><td colspan="3" class="px-6 py-8 sm:py-12 text-center text-gray-500 font-bold text-xs sm:text-sm">Data bersih. Tidak ada rekam ketidakhadiran di kriteria ini.</td></tr>';
+                if(htmlBody === '') htmlBody = '<tr><td colspan="3" class="px-6 py-8 sm:py-12 text-center text-gray-500 font-bold text-xs sm:text-sm">Data bersih atau tidak ditemukan.</td></tr>';
             } 
             else if(type === 'lembur') {
                 htmlHead = `<tr>
@@ -1544,13 +1558,13 @@
                         <td class="px-4 sm:px-6 py-3 sm:py-4 text-center text-[10px] sm:text-xs font-semibold text-gray-600"><span class="bg-gray-50 border border-gray-100 px-2 py-1 rounded-md">${s.dept} - ${s.grup}</span></td>
                     </tr>`;
                 });
-                if(htmlBody === '') htmlBody = '<tr><td colspan="3" class="px-6 py-8 sm:py-12 text-center text-gray-500 font-bold text-xs sm:text-sm">Tidak ada rekam lembur di periode ini.</td></tr>';
+                if(htmlBody === '') htmlBody = '<tr><td colspan="3" class="px-6 py-8 sm:py-12 text-center text-gray-500 font-bold text-xs sm:text-sm">Tidak ada rekam lembur di kriteria ini.</td></tr>';
             }
             else { 
                 htmlHead = `<tr>
                     <th class="px-4 sm:px-6 py-3 sm:py-4 font-extrabold text-navy-900 text-[10px] sm:text-xs uppercase tracking-wider">Karyawan</th>
                     <th class="px-4 sm:px-6 py-3 sm:py-4 font-extrabold text-navy-900 text-[10px] sm:text-xs uppercase tracking-wider text-center">% Hadir</th>
-                    <th class="px-4 sm:px-6 py-3 sm:py-4 font-extrabold text-navy-900 text-[10px] sm:text-xs uppercase tracking-wider text-center min-w-[120px] sm:min-w-[150px]">Detail (H/A/S/I/C)</th>
+                    <th class="px-4 sm:px-6 py-3 sm:py-4 font-extrabold text-navy-900 text-[10px] sm:text-xs uppercase tracking-wider text-center min-w-[120px] sm:min-w-[160px]">Detail (H/A/S/I/C/O)</th>
                 </tr>`;
                 
                 statsArray.forEach(s => {
@@ -1573,16 +1587,18 @@
                             </span>
                         </td>
                         <td class="px-4 sm:px-6 py-3 py-4 text-center text-[9px] sm:text-[10px]">
-                            <div class="flex justify-center gap-1 sm:gap-2 bg-gray-50 p-1.5 sm:p-2 rounded-lg sm:rounded-xl border border-gray-100 inline-flex">
+                            <div class="flex justify-center flex-wrap gap-1 sm:gap-2 bg-gray-50 p-1.5 sm:p-2 rounded-lg sm:rounded-xl border border-gray-100 inline-flex max-w-[200px] sm:max-w-xs">
                                 <span class="font-bold text-navy-900 px-0.5 sm:px-1" title="Hadir">H:${s.hadir}</span>
                                 <span class="font-bold text-red-500 px-0.5 sm:px-1" title="Alpha">A:${s.alpha}</span>
                                 <span class="font-bold text-orange-500 px-0.5 sm:px-1" title="Sakit">S:${s.sakit}</span>
                                 <span class="font-bold text-blue-500 px-0.5 sm:px-1" title="Izin">I:${s.izin}</span>
                                 <span class="font-bold text-purple-500 px-0.5 sm:px-1" title="Cuti">C:${s.cuti}</span>
+                                <span class="font-bold text-gray-500 px-0.5 sm:px-1" title="Off">O:${s.off}</span>
                             </div>
                         </td>
                     </tr>`;
                 });
+                if(htmlBody === '') htmlBody = '<tr><td colspan="3" class="px-6 py-8 sm:py-12 text-center text-gray-500 font-bold text-xs sm:text-sm">Tidak ditemukan data karyawan.</td></tr>';
             }
             thead.innerHTML = htmlHead;
             tbody.innerHTML = htmlBody;
