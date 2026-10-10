@@ -773,25 +773,25 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Pilih Shift</label>
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Pilih Shift (Bisa lebih dari 1)</label>
                     <div class="flex gap-2">
                         <label class="cursor-pointer flex-1">
-                            <input type="radio" name="std_shift" value="Shift 1" class="btn-radio peer hidden" checked onchange="loadStandard()">
+                            <input type="checkbox" name="std_shift" value="Shift 1" class="btn-checkbox peer hidden" checked onchange="loadStandard()">
                             <div class="text-center px-3 py-2 bg-white border border-gray-200 rounded-lg peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 text-xs font-bold text-gray-600 transition-all hover:bg-gray-50 shadow-sm">Shift 1</div>
                         </label>
                         <label class="cursor-pointer flex-1">
-                            <input type="radio" name="std_shift" value="Shift 2" class="btn-radio peer hidden" onchange="loadStandard()">
+                            <input type="checkbox" name="std_shift" value="Shift 2" class="btn-checkbox peer hidden" onchange="loadStandard()">
                             <div class="text-center px-3 py-2 bg-white border border-gray-200 rounded-lg peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 text-xs font-bold text-gray-600 transition-all hover:bg-gray-50 shadow-sm">Shift 2</div>
                         </label>
                         <label class="cursor-pointer flex-1">
-                            <input type="radio" name="std_shift" value="Shift 3" class="btn-radio peer hidden" onchange="loadStandard()">
+                            <input type="checkbox" name="std_shift" value="Shift 3" class="btn-checkbox peer hidden" onchange="loadStandard()">
                             <div class="text-center px-3 py-2 bg-white border border-gray-200 rounded-lg peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 text-xs font-bold text-gray-600 transition-all hover:bg-gray-50 shadow-sm">Shift 3</div>
                         </label>
                     </div>
                 </div>
 
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-4">
-                    <label class="block text-[10px] sm:text-xs font-bold text-navy-900 mb-3 border-b border-gray-200 pb-2">Pilih Line yang Jalan (Aktif) - Maksimal 5 Line</label>
+                    <label class="block text-[10px] sm:text-xs font-bold text-navy-900 mb-3 border-b border-gray-200 pb-2">Pilih Line yang Jalan (Aktif) - Maksimal 6 Line</label>
                     <div id="std-lines-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                         <!-- Lines checkboxes rendered by JS -->
                     </div>
@@ -1195,9 +1195,9 @@
 
         function handleLineSelection(checkbox) {
             const checkedLines = document.querySelectorAll('.std-line-cb:checked');
-            if(checkedLines.length > 5) {
+            if(checkedLines.length > 6) {
                 checkbox.checked = false;
-                showModal('info', 'Maksimal Line', 'Hanya dapat mengatur maksimal 5 line aktif untuk satu standard.');
+                showModal('info', 'Maksimal Line', 'Hanya dapat mengatur maksimal 6 line aktif untuk satu standard.');
                 return;
             }
             calculateMPP();
@@ -1210,7 +1210,7 @@
                 showModal('info', 'Batas Pilihan', 'Anda hanya dapat mengatur standard untuk maksimal 6 hari secara bersamaan.');
                 return;
             }
-            if(checkedDays.length > 0) loadStandard(checkedDays[0].value);
+            loadStandard();
         }
 
         function calculateMPP(overrideDay = null) {
@@ -1230,6 +1230,7 @@
             else if (countLines === 3) mpp = 10;
             else if (countLines === 4) { mpp = hasLine2SCO ? 10 : 12; }
             else if (countLines === 5) { mpp = hasLine2SCO ? 13 : 14; }
+            else if (countLines === 6) { mpp = hasLine2SCO ? 15 : 16; }
             
             if (isSaturday) mpp -= 1;
             if (mpp < 0) mpp = 0;
@@ -1238,46 +1239,61 @@
             return { mpp, lines: selectedLines };
         }
 
-        function loadStandard(specificDay = null) {
+        function loadStandard() {
             let week = getEl('std-week').value;
-            let checkedDays = document.querySelectorAll('input[name="std_day"]:checked');
-            let day = specificDay || (checkedDays.length > 0 ? checkedDays[0].value : null);
-            let shiftElement = document.querySelector('input[name="std_shift"]:checked');
-            let shift = shiftElement ? shiftElement.value : null;
+            let checkedDays = Array.from(document.querySelectorAll('input[name="std_day"]:checked')).map(cb => cb.value);
+            let checkedShifts = Array.from(document.querySelectorAll('input[name="std_shift"]:checked')).map(cb => cb.value);
 
-            if(!week || !day || !shift) {
-                document.querySelectorAll('.std-line-cb').forEach(cb => cb.checked = false);
-                calculateMPP();
-                return;
+            let existingLines = new Set();
+
+            if (week && checkedDays.length > 0 && checkedShifts.length > 0) {
+                checkedDays.forEach(day => {
+                    checkedShifts.forEach(shift => {
+                        let key = `${week}_${day}_${shift}`;
+                        if (db.standards[key] && db.standards[key].lines) {
+                            db.standards[key].lines.forEach(l => existingLines.add(l));
+                        }
+                    });
+                });
             }
             
-            let key = `${week}_${day}_${shift}`;
-            let data = db.standards[key] || { lines: [], mpp: 0 };
-            
             document.querySelectorAll('.std-line-cb').forEach(cb => {
-                cb.checked = data.lines.includes(cb.value);
+                const label = cb.closest('label');
+                if (existingLines.has(cb.value)) {
+                    cb.checked = true;
+                    cb.disabled = true;
+                    label.classList.add('bg-gray-100', 'opacity-70', 'cursor-not-allowed');
+                    label.classList.remove('hover:bg-gray-50', 'cursor-pointer');
+                    label.title = 'Line ini sudah tersimpan di database untuk pilihan hari/shift tersebut.';
+                } else {
+                    cb.checked = false;
+                    cb.disabled = false;
+                    label.classList.remove('bg-gray-100', 'opacity-70', 'cursor-not-allowed');
+                    label.classList.add('hover:bg-gray-50', 'cursor-pointer');
+                    label.title = '';
+                }
             });
-            calculateMPP(day);
+            calculateMPP();
         }
 
         async function saveStandardData() {
             let week = getEl('std-week').value;
-            let checkedDays = document.querySelectorAll('input[name="std_day"]:checked');
-            let shiftElement = document.querySelector('input[name="std_shift"]:checked');
+            let checkedDays = Array.from(document.querySelectorAll('input[name="std_day"]:checked')).map(cb => cb.value);
+            let checkedShifts = Array.from(document.querySelectorAll('input[name="std_shift"]:checked')).map(cb => cb.value);
             
             if(!week) return showModal('error', 'Gagal', 'Pilih minggu terlebih dahulu!');
             if(checkedDays.length === 0) return showModal('error', 'Gagal', 'Pilih minimal satu hari (Maksimal 6 hari)!');
-            if(!shiftElement) return showModal('error', 'Gagal', 'Pilih shift!');
-            
-            let shift = shiftElement.value;
-            let daysList = Array.from(checkedDays).map(cb => cb.value);
+            if(checkedShifts.length === 0) return showModal('error', 'Gagal', 'Pilih minimal satu shift!');
             
             let payload = [];
-            daysList.forEach(day => {
-                let key = `${week}_${day}_${shift}`;
-                let { mpp, lines } = calculateMPP(day); 
-                db.standards[key] = { mpp, lines };
-                payload.push({ week: week, day: day, shift: shift, mpp: mpp, lines: lines.join(", ") });
+            
+            checkedDays.forEach(day => {
+                checkedShifts.forEach(shift => {
+                    let key = `${week}_${day}_${shift}`;
+                    let { mpp, lines } = calculateMPP(day); 
+                    db.standards[key] = { mpp, lines };
+                    payload.push({ week: week, day: day, shift: shift, mpp: mpp, lines: lines.join(", ") });
+                });
             });
             
             localStorage.setItem(STD_CACHE_KEY, JSON.stringify(db.standards));
@@ -1290,7 +1306,7 @@
                 });
                 const res = await response.json();
                 if(res.status === 'success') {
-                    showModal('success', 'Tersimpan', `Standard untuk ${daysList.join(', ')} (${shift}) berhasil disimpan ke Database.`);
+                    showModal('success', 'Tersimpan', `Standard untuk ${checkedDays.join(', ')} (${checkedShifts.join(', ')}) berhasil disimpan.`);
                     closeStaffSetting();
                     
                     if(!getEl('view-formasi').classList.contains('hidden')) loadFormasiPlotting();
