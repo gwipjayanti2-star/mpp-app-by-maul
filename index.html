@@ -46,10 +46,6 @@
                             600: '#64748b',
                             700: '#475569',
                         }
-                    },
-                    boxShadow: {
-                        'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
-                        'glow': '0 0 20px rgba(148, 163, 184, 0.3)',
                     }
                 }
             }
@@ -62,7 +58,6 @@
             color: #1e293b; 
         }
         
-        /* Modern Sidebar Styles */
         .sidebar-active { 
             background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, transparent 100%);
             border-left: 4px solid #cbd5e1; 
@@ -73,10 +68,9 @@
         .sidebar-item:hover:not(.sidebar-active) { 
             background: rgba(255,255,255,0.05); 
             border-left-color: #94a3b8; 
-            padding-left: 1.5rem; /* Slight indent on hover */
+            padding-left: 1.5rem;
         }
         
-        /* Glassmorphism Classes */
         .glass-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -84,11 +78,11 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Scrollbar Styling */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .custom-scrollbar::-webkit-scrollbar { height: 4px; }
 
         .loader-ring { 
             border: 3px solid rgba(10, 25, 47, 0.1); 
@@ -105,12 +99,10 @@
             -webkit-appearance: none; margin: 0; 
         }
         
-        /* Radio Button Custom Styling for Attendance */
-        .att-radio:checked + div {
+        .att-radio:checked + div, .btn-radio:checked + div, .btn-checkbox:checked + div {
             transform: scale(1.05);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        /* Style for disabled elements */
         .cursor-not-allowed {
             pointer-events: none;
         }
@@ -118,7 +110,6 @@
 </head>
 <body class="flex h-screen overflow-hidden antialiased relative">
 
-    <!-- Login Screen Modernized -->
     <div id="login-screen" class="fixed inset-0 bg-navy-900 z-50 flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiIGZpbGw9IiMwYTE5MmYiLz4KPHBhdGggZD0iTTAgMGg0MHY0MEgweiIgZmlsbD0idXJsKCNncmFkKSIgb3BhY2l0eT0iLjIiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmZmYiIHN0b3Atb3BhY2l0eT0iLjEiLz4KPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZmZmIiBzdG9wLW9wYWNpdHk9IjAiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4=')] opacity-20"></div>
         <img src="https://www.image2url.com/r2/default/files/1788922910146-4d3196e8-d349-4a8e-9d23-48a0b748af9e.png" alt="Logo" class="h-32 w-auto mb-10 drop-shadow-glow relative z-10">
@@ -133,7 +124,6 @@
         </div>
     </div>
 
-    <!-- Mobile Overlay -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-navy-900/40 z-30 hidden md:hidden transition-opacity duration-300 opacity-0 backdrop-blur-sm" onclick="toggleSidebar()"></div>
 
     <aside class="w-72 bg-navy-900 text-white flex flex-col transition-transform duration-300 md:relative absolute z-40 h-full transform -translate-x-full md:translate-x-0 shadow-2xl" id="sidebar">
@@ -151,6 +141,9 @@
             </button>
             
             <p class="px-4 text-[10px] font-bold text-navy-100 uppercase tracking-[0.2em] mt-6 mb-3 opacity-50">Data Entry</p>
+            <button onclick="navigate('formasi')" id="nav-formasi" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-xl text-left mb-2">
+                <i class="fas fa-users-cog w-8 text-lg"></i> Formasi Mingguan
+            </button>
             <button onclick="navigate('attendance')" id="nav-attendance" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-xl text-left mb-2">
                 <i class="fas fa-calendar-check w-8 text-lg"></i> Kehadiran Harian
             </button>
@@ -159,6 +152,9 @@
             </button>
             
             <p class="px-4 text-[10px] font-bold text-navy-100 uppercase tracking-[0.2em] mt-6 mb-3 opacity-50">Analytics</p>
+            <button onclick="navigate('lihat-formasi')" id="nav-lihat-formasi" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-xl text-left mb-2">
+                <i class="fas fa-calendar-alt w-8 text-lg"></i> Lihat Formasi
+            </button>
             <button onclick="navigate('reports')" id="nav-reports" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-xl text-left">
                 <i class="fas fa-chart-pie w-8 text-lg"></i> Rekap & Laporan
             </button>
@@ -248,26 +244,133 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                    <!-- Top Lembur -->
                     <div class="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100 flex flex-col h-[280px] sm:h-[350px]">
                         <h3 class="text-sm sm:text-base font-bold text-navy-900 mb-3 sm:mb-4 flex items-center pb-2 sm:pb-3 border-b border-gray-100">
                             <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-silver-100 text-silver-600 flex items-center justify-center mr-2 sm:mr-3"><i class="fas fa-crown text-sm"></i></div>
                             Top Karyawan Lembur <span class="text-xs font-normal text-gray-400 ml-2 hidden sm:inline">(Klik untuk rincian)</span>
                         </h3>
                         <div id="listTopOvertime" class="flex flex-col gap-2 flex-1 overflow-y-auto custom-scrollbar pr-1 sm:pr-2">
-                            <!-- Diisi oleh JS -->
                         </div>
                     </div>
                     
-                    <!-- Top Absen -->
                     <div class="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100 flex flex-col h-[280px] sm:h-[350px]">
                         <h3 class="text-sm sm:text-base font-bold text-navy-900 mb-3 sm:mb-4 flex items-center pb-2 sm:pb-3 border-b border-gray-100">
                             <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center mr-2 sm:mr-3"><i class="fas fa-exclamation-triangle text-sm"></i></div>
                             Sering Tidak Masuk <span class="text-xs font-normal text-gray-400 ml-2 hidden sm:inline">(Klik untuk rincian)</span>
                         </h3>
                         <div id="listWorstAbsence" class="flex flex-col gap-2 flex-1 overflow-y-auto custom-scrollbar pr-1 sm:pr-2">
-                            <!-- Diisi oleh JS -->
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-formasi" class="hidden space-y-4 max-w-6xl mx-auto">
+                <div class="bg-white rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100 overflow-hidden">
+                    <div class="p-3 sm:p-4 bg-gradient-to-r from-navy-900 to-navy-800 text-white flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/10 flex items-center justify-center text-sm sm:text-base backdrop-blur-sm"><i class="fas fa-users-cog text-silver-400"></i></div>
+                            <div>
+                                <h3 class="text-sm sm:text-base font-bold leading-tight">Plotting Formasi Mingguan</h3>
+                                <p class="text-[10px] sm:text-xs text-navy-100 opacity-80">Atur job desk masuk & off (52 Minggu)</p>
+                            </div>
+                        </div>
+                        <button onclick="openStaffAuth()" class="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center">
+                            <i class="fas fa-lock text-[10px] mr-1.5"></i> Atur Standard (Staff)
+                        </button>
+                    </div>
+                    
+                    <div class="p-4 sm:p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 mb-5 bg-gray-50/80 p-3 sm:p-4 rounded-2xl border border-gray-100 shadow-inner">
+                            <div class="md:col-span-4">
+                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Minggu</label>
+                                <select id="plot-week" class="w-full p-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-navy-900 text-xs shadow-sm transition-all cursor-pointer" onchange="loadFormasiPlotting()"></select>
+                            </div>
+                            <div class="md:col-span-4">
+                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Unit Kerja</label>
+                                <select id="plot-dept" class="w-full p-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-navy-900 text-xs shadow-sm transition-all cursor-pointer" onchange="loadFormasiPlotting()">
+                                    <option value="">-- Pilih Unit --</option>
+                                    <option value="DUMPING">DUMPING</option>
+                                    <option value="CRUSHER">CRUSHER</option>
+                                    <option value="CCP">CCP</option>
+                                    <option value="MHS">MHS</option>
+                                    <option value="GWIP">GWIP</option>
+                                    <option value="ADMIN GWIP">ADMIN GWIP</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-4">
+                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Grup Shift</label>
+                                <select id="plot-group" class="w-full p-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-navy-900 text-xs shadow-sm transition-all cursor-pointer" onchange="loadFormasiPlotting()">
+                                    <option value="">-- Pilih Grup --</option>
+                                    <option value="Grup A">Grup A</option>
+                                    <option value="Grup B">Grup B</option>
+                                    <option value="Grup C">Grup C</option>
+                                    <option value="NON SHIFT">NON SHIFT</option>
+                                </select>
+                            </div>
+                            
+                            <div class="md:col-span-12 mt-1 sm:mt-2">
+                                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-2">
+                                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide">Pilih Hari Formasi</label>
+                                    <div class="flex items-center bg-indigo-50/50 px-2.5 py-1 rounded-lg border border-indigo-100/50">
+                                        <span class="text-[9px] sm:text-[10px] text-gray-500 font-semibold mr-2 uppercase tracking-wider">Rotasi Shift:</span>
+                                        <div id="plot-shift-display" class="px-2 py-0.5 bg-white border border-indigo-200 rounded text-indigo-600 font-extrabold text-[10px] sm:text-xs shadow-sm flex items-center">
+                                            <i class="fas fa-sync-alt mr-1 text-[9px] opacity-70"></i> Pilih Grup
+                                        </div>
+                                        <input type="hidden" id="plot-shift-hidden" value="">
+                                    </div>
+                                </div>
+
+                                <div class="flex p-1 bg-gray-200/60 rounded-xl overflow-x-auto custom-scrollbar shadow-inner gap-1">
+                                    <script>
+                                        const daysList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                                        daysList.forEach((day, idx) => {
+                                            document.write(`
+                                            <label class="flex-1 min-w-[50px] sm:min-w-[0] cursor-pointer text-center relative group">
+                                                <input type="radio" name="plot_day" value="${day}" class="peer hidden" ${idx===0 ? 'checked' : ''} onchange="loadFormasiPlotting()">
+                                                <div class="py-1.5 sm:py-2 text-[10px] sm:text-[11px] font-bold text-gray-500 rounded-lg peer-checked:bg-white peer-checked:text-navy-900 peer-checked:shadow-sm transition-all duration-300 hover:text-gray-700">${day}</div>
+                                            </label>
+                                            `);
+                                        });
+                                    </script>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="plot-info-card" class="hidden mb-4 p-2.5 sm:p-3 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-blue-500 shrink-0">
+                                    <i class="fas fa-cogs text-xs"></i>
+                                </div>
+                                <div>
+                                    <div class="text-[9px] sm:text-[10px] text-blue-600 font-bold uppercase tracking-wide">Std. MPP (Dumping)</div>
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="text-sm sm:text-base font-black text-navy-900 leading-none" id="plot-display-std">0</span>
+                                        <span class="text-[9px] sm:text-[10px] font-bold text-gray-500" id="plot-display-std-label"></span>
+                                    </div>
+                                    <div class="text-[8px] sm:text-[9px] text-gray-400 font-medium mt-0.5" id="plot-display-lines">Line: -</div>
+                                </div>
+                            </div>
+                            <div class="text-right p-1.5 sm:p-2 bg-white rounded-lg border border-blue-50/50 shadow-sm w-full sm:w-auto min-w-[100px]">
+                                <div class="text-[8px] sm:text-[9px] text-blue-500 font-bold uppercase tracking-wider mb-0.5">Total Terpilih</div>
+                                <div class="text-sm sm:text-base font-black text-navy-900 leading-none" id="plot-display-count">0 Orang</div>
+                            </div>
+                        </div>
+
+                        <div id="plot-employee-container" class="hidden">
+                            <div class="border border-gray-100 rounded-xl sm:rounded-2xl bg-slate-50/50 p-2 sm:p-4 max-h-[500px] overflow-y-auto custom-scrollbar shadow-inner">
+                                <div id="plot-grid" class="flex flex-col gap-2">
+                                </div>
+                            </div>
+                            <div class="mt-4 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-100">
+                                <button onclick="shareFormasiWhatsApp()" class="flex-1 sm:flex-none sm:w-auto bg-[#25D366] hover:bg-[#128C7E] text-white px-3 sm:px-5 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm font-bold transition-all flex items-center justify-center gap-2 text-xs sm:text-sm">
+                                    <i class="fab fa-whatsapp text-sm sm:text-base"></i> Share WA
+                                </button>
+                                <button id="btn-save-formasi" onclick="saveFormasi()" class="flex-1 sm:flex-none sm:w-auto bg-gradient-to-r from-navy-900 to-navy-800 text-white px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm font-bold transition-all flex items-center justify-center gap-2 text-xs sm:text-sm">
+                                    <i class="fas fa-save text-sm"></i> Simpan Formasi
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -297,6 +400,7 @@
                                     <option value="DUMPING">DUMPING</option>
                                     <option value="CRUSHER">CRUSHER</option>
                                     <option value="CCP">CCP</option>
+                                    <option value="MHS">MHS</option>
                                     <option value="GWIP">GWIP</option>
                                     <option value="ADMIN GWIP">ADMIN GWIP</option>
                                 </select>
@@ -326,11 +430,9 @@
                             
                             <div class="border border-gray-100 rounded-xl sm:rounded-2xl bg-slate-50/50 p-2 sm:p-4 max-h-[500px] overflow-y-auto custom-scrollbar shadow-inner">
                                 <div id="att-checkbox-grid" class="flex flex-col gap-2 sm:gap-3">
-                                    <!-- Diisi JS -->
                                 </div>
                             </div>
                             
-                            <!-- Tombol Submit -->
                             <div id="att-submit-container" class="mt-4 flex flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-100">
                                 <button onclick="shareWhatsAppAttendance()" class="flex-1 sm:flex-none sm:w-auto bg-[#25D366] hover:bg-[#128C7E] text-white px-3 sm:px-5 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm font-bold transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-xs sm:text-sm">
                                     <i class="fab fa-whatsapp text-sm sm:text-base"></i> Share WA
@@ -368,6 +470,7 @@
                                     <option value="DUMPING">DUMPING</option>
                                     <option value="CRUSHER">CRUSHER</option>
                                     <option value="CCP">CCP</option>
+                                    <option value="MHS">MHS</option>
                                     <option value="GWIP">GWIP</option>
                                     <option value="ADMIN GWIP">ADMIN GWIP</option>
                                 </select>
@@ -412,11 +515,9 @@
                             
                             <div class="border border-gray-100 rounded-xl sm:rounded-2xl bg-slate-50/50 p-3 sm:p-4 max-h-[400px] overflow-y-auto custom-scrollbar shadow-inner">
                                 <div id="ot-checkbox-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-                                    <!-- Diisi JS -->
                                 </div>
                             </div>
                             
-                            <!-- Tombol Submit -->
                             <div class="mt-4 flex flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-100">
                                 <button onclick="shareWhatsApp()" class="flex-1 sm:flex-none sm:w-auto bg-[#25D366] hover:bg-[#128C7E] text-white px-3 sm:px-5 py-2.5 sm:py-3 rounded-lg sm:rounded-xl shadow-sm font-bold transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-xs sm:text-sm">
                                     <i class="fab fa-whatsapp text-sm sm:text-base"></i> Share WA
@@ -425,6 +526,79 @@
                                     <i class="fas fa-save text-sm"></i> Simpan Data
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-lihat-formasi" class="hidden space-y-4 max-w-7xl mx-auto">
+                <div class="bg-white rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100 overflow-hidden">
+                    <div class="p-4 sm:p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600"><i class="fas fa-calendar-alt"></i></div>
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-navy-900 leading-tight">Lihat Jadwal Formasi</h3>
+                                <p class="text-xs text-gray-500">Pantau plotting formasi mingguan</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                            <button onclick="shareLihatFormasiWhatsApp()" class="bg-[#25D366] hover:bg-[#128C7E] text-white px-3 py-2 rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center hidden md:flex">
+                                <i class="fab fa-whatsapp mr-2"></i> Share WA
+                            </button>
+                            <button onclick="exportFormasiToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center hidden md:flex">
+                                <i class="fas fa-file-excel mr-2"></i> Export Excel
+                            </button>
+                            <div class="flex bg-gray-50 p-1 rounded-xl border border-gray-200 flex-1 md:flex-none">
+                                <label class="cursor-pointer flex-1 md:flex-none">
+                                    <input type="radio" name="lihat_week_type" value="current" class="btn-radio peer hidden" checked onchange="renderLihatFormasi()">
+                                    <div class="px-3 py-2 text-[10px] sm:text-xs font-bold text-center rounded-lg text-gray-500 peer-checked:bg-white peer-checked:text-navy-900 peer-checked:shadow-sm transition-all">Minggu Ini</div>
+                                </label>
+                                <label class="cursor-pointer flex-1 md:flex-none">
+                                    <input type="radio" name="lihat_week_type" value="next" class="btn-radio peer hidden" onchange="renderLihatFormasi()">
+                                    <div class="px-3 py-2 text-[10px] sm:text-xs font-bold text-center rounded-lg text-gray-500 peer-checked:bg-white peer-checked:text-navy-900 peer-checked:shadow-sm transition-all">Minggu Depan</div>
+                                </label>
+                            </div>
+                            <button onclick="shareLihatFormasiWhatsApp()" class="bg-[#25D366] hover:bg-[#128C7E] text-white px-3 py-2.5 rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center justify-center md:hidden">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                            <button onclick="exportFormasiToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2.5 rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center justify-center md:hidden">
+                                <i class="fas fa-file-excel"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 sm:p-6 bg-gray-50 border-b border-gray-100">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="flex-1">
+                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Unit Kerja</label>
+                                <select id="lihat-dept" class="w-full p-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-navy-900 text-sm shadow-sm cursor-pointer" onchange="renderLihatFormasi()">
+                                    <option value="ALL">SEMUA UNIT</option>
+                                    <option value="DUMPING">DUMPING</option>
+                                    <option value="CRUSHER">CRUSHER</option>
+                                    <option value="CCP">CCP</option>
+                                    <option value="MHS">MHS</option>
+                                    <option value="GWIP">GWIP</option>
+                                    <option value="ADMIN GWIP">ADMIN GWIP</option>
+                                </select>
+                            </div>
+                            <div class="flex-1">
+                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Grup</label>
+                                <select id="lihat-group" class="w-full p-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-navy-900 text-sm shadow-sm cursor-pointer" onchange="renderLihatFormasi()">
+                                    <option value="ALL">SEMUA GRUP</option>
+                                    <option value="Grup A">Grup A</option>
+                                    <option value="Grup B">Grup B</option>
+                                    <option value="Grup C">Grup C</option>
+                                    <option value="NON SHIFT">NON SHIFT</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 sm:p-6">
+                        <div id="lihat-schedule-header" class="mb-4 text-center font-bold text-navy-900 bg-blue-50 p-2 rounded-lg border border-blue-100 hidden">
+                        </div>
+                        <div id="lihat-schedule-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         </div>
                     </div>
                 </div>
@@ -445,8 +619,8 @@
                             <label class="block text-[10px] sm:text-xs font-bold text-gray-500 mb-1 sm:mb-2 uppercase tracking-wide">Tipe Rekap</label>
                             <select id="rep-type" class="w-full bg-gray-50 border-0 text-navy-900 text-xs sm:text-sm rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 p-2.5 sm:p-3 font-bold shadow-inner cursor-pointer" onchange="handleReportTypeChange()">
                                 <option value="lengkap">Ringkasan Total (H/A/S/I/C/O)</option>
-                                <option value="absen">Detail Tidak Masuk (Klik untuk Rincian)</option>
-                                <option value="lembur">Detail Jam Lembur (Klik untuk Rincian)</option>
+                                <option value="absen">Detail Tidak Masuk</option>
+                                <option value="lembur">Detail Jam Lembur</option>
                             </select>
                         </div>
                         <div>
@@ -456,6 +630,7 @@
                                 <option value="DUMPING">DUMPING</option>
                                 <option value="CRUSHER">CRUSHER</option>
                                 <option value="CCP">CCP</option>
+                                <option value="MHS">MHS</option>
                                 <option value="GWIP">GWIP</option>
                                 <option value="ADMIN GWIP">ADMIN GWIP</option>
                             </select>
@@ -510,10 +685,8 @@
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="min-w-full divide-y divide-gray-100 text-xs sm:text-sm text-left whitespace-nowrap">
                             <thead class="bg-gray-50/80" id="rep-thead">
-                                <!-- Diisi JS -->
                             </thead>
                             <tbody id="rep-tbody" class="bg-white divide-y divide-gray-50">
-                                <!-- Diisi JS -->
                             </tbody>
                         </table>
                     </div>
@@ -549,24 +722,142 @@
             </div>
             <div class="p-4 sm:p-6 overflow-y-auto custom-scrollbar flex-1 bg-white">
                 <ul id="detail-list" class="space-y-2 sm:space-y-3">
-                    <!-- Diisi JS -->
                 </ul>
             </div>
         </div>
     </div>
 
+    <!-- Staff Auth Modal -->
+    <div id="staff-auth-modal" class="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[80] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 w-11/12 max-w-sm text-center transform scale-95 transition-transform duration-300" id="staff-auth-content">
+            <h3 class="text-xl font-bold text-navy-900 mb-2">Akses Staff</h3>
+            <p class="text-xs text-gray-500 mb-4">Masukkan password untuk mengatur standard formasi.</p>
+            <input type="password" id="staff-pass" placeholder="Password" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl mb-4 text-center focus:ring-2 focus:ring-navy-900 outline-none font-mono tracking-widest" onkeypress="if(event.key === 'Enter') checkStaffAuth()">
+            <div class="flex gap-2">
+                <button onclick="closeStaffAuth()" class="flex-1 py-3 bg-gray-100 hover:bg-gray-200 transition-colors text-gray-700 font-bold rounded-xl text-sm">Batal</button>
+                <button onclick="checkStaffAuth()" class="flex-1 py-3 bg-navy-900 hover:bg-navy-800 transition-colors text-white font-bold rounded-xl text-sm">Masuk</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Setting Modal -->
+    <div id="staff-setting-modal" class="fixed inset-0 bg-navy-900/60 backdrop-blur-md z-[80] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl p-5 sm:p-6 w-11/12 max-w-2xl transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]" id="staff-setting-content">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+                <h3 class="text-lg sm:text-xl font-bold text-navy-900">Atur Standard Line Dumping</h3>
+                <button onclick="closeStaffSetting()" class="text-gray-400 hover:text-navy-900 w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="overflow-y-auto custom-scrollbar flex-1 pr-1 sm:pr-2">
+                <div class="mb-4">
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Pilih Minggu</label>
+                    <select id="std-week" class="w-full p-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-navy-900 text-xs font-bold text-navy-900 cursor-pointer" onchange="loadStandard()"></select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Pilih Hari (Maksimal 6 Hari)</label>
+                    <div class="flex flex-wrap gap-2">
+                        <script>
+                            const stdDays = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                            stdDays.forEach((day, idx) => {
+                                document.write(`
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="std_day" value="${day}" class="btn-checkbox peer hidden" ${idx===0 ? 'checked' : ''} onchange="handleStdDayChange(this)">
+                                    <div class="px-4 py-2 bg-white border border-gray-200 rounded-lg peer-checked:bg-navy-900 peer-checked:text-white peer-checked:border-navy-900 text-xs font-bold text-gray-600 transition-all hover:bg-gray-50 shadow-sm">${day}</div>
+                                </label>
+                                `);
+                            });
+                        </script>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-1 italic">*Anda bisa memilih beberapa hari sekaligus untuk menerapkan standard yang sama.</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Pilih Shift</label>
+                    <div class="flex gap-2">
+                        <label class="cursor-pointer flex-1">
+                            <input type="radio" name="std_shift" value="Shift 1" class="btn-radio peer hidden" checked onchange="loadStandard()">
+                            <div class="text-center px-3 py-2 bg-white border border-gray-200 rounded-lg peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 text-xs font-bold text-gray-600 transition-all hover:bg-gray-50 shadow-sm">Shift 1</div>
+                        </label>
+                        <label class="cursor-pointer flex-1">
+                            <input type="radio" name="std_shift" value="Shift 2" class="btn-radio peer hidden" onchange="loadStandard()">
+                            <div class="text-center px-3 py-2 bg-white border border-gray-200 rounded-lg peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 text-xs font-bold text-gray-600 transition-all hover:bg-gray-50 shadow-sm">Shift 2</div>
+                        </label>
+                        <label class="cursor-pointer flex-1">
+                            <input type="radio" name="std_shift" value="Shift 3" class="btn-radio peer hidden" onchange="loadStandard()">
+                            <div class="text-center px-3 py-2 bg-white border border-gray-200 rounded-lg peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 text-xs font-bold text-gray-600 transition-all hover:bg-gray-50 shadow-sm">Shift 3</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-4">
+                    <label class="block text-[10px] sm:text-xs font-bold text-navy-900 mb-3 border-b border-gray-200 pb-2">Pilih Line yang Jalan (Aktif) - Maksimal 5 Line</label>
+                    <div id="std-lines-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        <!-- Lines checkboxes rendered by JS -->
+                    </div>
+                </div>
+
+                <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex justify-between items-center mb-4">
+                    <div>
+                        <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide block mb-0.5">Calculated MPP Khusus Dumping</span>
+                        <span class="text-xs text-gray-500">Berdasarkan rumus formasi</span>
+                    </div>
+                    <div class="flex items-end gap-1 text-navy-900">
+                        <span id="std-calc-mpp" class="text-3xl font-black">0</span>
+                        <span class="text-xs font-bold mb-1">Orang</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 mt-2 border-t border-gray-100">
+                <button onclick="saveStandardData()" class="w-full py-3 sm:py-3.5 bg-gradient-to-r from-navy-900 to-navy-800 text-white font-bold rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all text-sm sm:text-base flex justify-center items-center gap-2">
+                    <i class="fas fa-save"></i> Simpan Standard Terpilih
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbynLsxoOqWfEehRi4KAIGjt70fDNDzNf4NZliXFlgLTHc1FVsEQyT8EUf1HwEQmTUsVaQ/exec"; 
-        let db = { employees: [], attendance: [], overtime: [] };
+        // GANTI DENGAN URL DEPLOY SCRIPT ANDA
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwIyfgNgGvr6WJCEYsoah3HnRDSa6heHazk34N9ZpSaX3BrsnlisPEnSXWu-IbB5qWfTA/exec"; 
+        
+        let db = { 
+            employees: [], 
+            attendance: [], 
+            overtime: [],
+            standards: {}, 
+            formasi: {}    
+        };
         const getEl = id => document.getElementById(id);
         
         const CACHE_KEY = 'mpp_pro_data_cache';
         const CACHE_TIME_KEY = 'mpp_pro_data_time';
-        const CACHE_EXPIRY = 1000 * 60 * 60; // 1 jam
+        const STD_CACHE_KEY = 'mpp_pro_standards';
+        const FMT_CACHE_KEY = 'mpp_pro_formasi';
+        const CACHE_EXPIRY = 1000 * 60 * 60; 
 
-        // --- PRELOAD DATA SILENTLY ---
+        const linesList = [
+            "LINE 1 SGC", "LINE 2 SCO", "LINE 2 TYS", "LINE 2 ABON", "LINE 2 MCR",
+            "LINE 3 CCN", "LINE 4 MCR", "LINE 4 CHINA", "LINE 5 RSC", "LINE 4.2 CCN 2"
+        ];
+        
+        const jobDesks = {
+            'DUMPING': ['GULA CAIRAN/ADONAN', 'GULA SAUR/ADONAN', 'ISI SILO', 'MANUAL RSC', 'TAPIOKA VTS/DOUGH', 'TAPIOKA SAUR/MANUAL', 'SORTIR WASTE'],
+            'CRUSHER': ['GILING WASTE'],
+            'GWIP': ['SUPPLY BAHAN'],
+            'CCP': ['PENGECEKAN CCP OPRP'],
+            'MHS': ['MENGONTROL MESIN MHS'],
+            'ADMIN GWIP': ['ADMIN'] 
+        };
+
         async function preloadDataSilently() {
             try {
+                const savedStd = localStorage.getItem(STD_CACHE_KEY);
+                if(savedStd) db.standards = JSON.parse(savedStd);
+                
+                const savedFmt = localStorage.getItem(FMT_CACHE_KEY);
+                if(savedFmt) db.formasi = JSON.parse(savedFmt);
+
                 const cachedData = localStorage.getItem(CACHE_KEY);
                 const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
                 
@@ -575,6 +866,8 @@
                     db.employees = result.employees || [];
                     db.attendance = result.attendance || [];
                     db.overtime = result.overtime || [];
+                    if(result.standards) db.standards = result.standards;
+                    if(result.formasi) db.formasi = result.formasi;
                 } else {
                     fetch(`${GAS_URL}?action=getAllData`)
                     .then(res => res.json())
@@ -583,6 +876,8 @@
                             db.employees = result.employees;
                             db.attendance = result.attendance;
                             db.overtime = result.overtime;
+                            if(result.standards) db.standards = result.standards;
+                            if(result.formasi) db.formasi = result.formasi;
                             localStorage.setItem(CACHE_KEY, JSON.stringify(db));
                             localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
                         }
@@ -595,19 +890,65 @@
             getEl('att-date').valueAsDate = new Date();
             getEl('ot-date').valueAsDate = new Date();
             generatePeriodeOptions();
+            generateWeekOptions(); 
             preloadDataSilently(); 
+            
+            let weekStr = getWeekString(0);
+            getEl('plot-week').value = weekStr;
+            getEl('std-week').value = weekStr;
         });
+
+        function getWeekString(offsetWeeks = 0) {
+            let d = new Date();
+            d.setDate(d.getDate() + (offsetWeeks * 7));
+            let year = d.getFullYear();
+            let week = Math.ceil(Math.floor((d - new Date(year,0,1)) / (24*60*60*1000)) / 7);
+            if (week > 52) week = 1; 
+            return `${year}-W${String(week).padStart(2,'0')}`;
+        }
+
+        function generateWeekOptions() {
+            const year = new Date().getFullYear();
+            let options = '';
+            for(let i=1; i<=52; i++) {
+                let w = String(i).padStart(2, '0');
+                let val = `${year}-W${w}`;
+                options += `<option value="${val}">Minggu ${i} (${year})</option>`;
+            }
+            const plotWeek = getEl('plot-week');
+            const stdWeek = getEl('std-week');
+            if(plotWeek) plotWeek.innerHTML = options;
+            if(stdWeek) stdWeek.innerHTML = options;
+        }
+        
+        function getAutomaticShift(weekStr, group) {
+            if (!weekStr || !group || group === 'NON SHIFT' || group === '') return 'NON SHIFT';
+            let weekNum = parseInt(weekStr.split('-W')[1], 10);
+            let mod = weekNum % 3;
+            if (group === 'Grup A') {
+                if (mod === 0) return 'Shift 1';
+                if (mod === 1) return 'Shift 3';
+                if (mod === 2) return 'Shift 2';
+            } else if (group === 'Grup B') {
+                if (mod === 0) return 'Shift 2';
+                if (mod === 1) return 'Shift 1';
+                if (mod === 2) return 'Shift 3';
+            } else if (group === 'Grup C') {
+                if (mod === 0) return 'Shift 3';
+                if (mod === 1) return 'Shift 2';
+                if (mod === 2) return 'Shift 1';
+            }
+            return 'Shift 1';
+        }
 
         function checkLogin() {
             const pass = getEl('password-input').value;
             if(pass === 'admin') {
                 getEl('login-screen').classList.add('opacity-0');
-                
                 const isDataReady = db.employees.length > 0;
 
                 setTimeout(() => {
                     getEl('login-screen').classList.add('hidden');
-                    
                     if(isDataReady) {
                         renderDashboard();
                         if(!getEl('view-reports').classList.contains('hidden')) renderReports();
@@ -625,11 +966,9 @@
         function generatePeriodeOptions() {
             const selects = [getEl('dash-periode'), getEl('rep-periode')];
             let today = new Date();
-            
             if (today.getDate() >= 16) {
                 today.setMonth(today.getMonth() + 1);
             }
-
             let optionsHTML = '';
             const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
@@ -643,7 +982,6 @@
                 let prevYear = prevMonthDate.getFullYear();
 
                 let label = `${monthNames[targetMonth]} ${targetYear}`;
-                
                 let startDate = `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}-16`;
                 let endDate = `${targetYear}-${String(targetMonth + 1).padStart(2, '0')}-15`;
                 let val = `${startDate}_${endDate}`;
@@ -663,15 +1001,18 @@
                 if (!isManual) {
                     const cachedData = localStorage.getItem(CACHE_KEY);
                     const cacheTime = localStorage.getItem(CACHE_TIME_KEY);
-                    
                     if (cachedData && cacheTime && (Date.now() - parseInt(cacheTime) < CACHE_EXPIRY)) {
                         const result = JSON.parse(cachedData);
                         db.employees = result.employees || [];
                         db.attendance = result.attendance || [];
                         db.overtime = result.overtime || [];
+                        if(result.standards) db.standards = result.standards;
+                        if(result.formasi) db.formasi = result.formasi;
                         
                         renderDashboard();
                         if(!getEl('view-reports').classList.contains('hidden')) renderReports();
+                        if(!getEl('view-formasi').classList.contains('hidden')) loadFormasiPlotting();
+                        if(!getEl('view-lihat-formasi').classList.contains('hidden')) renderLihatFormasi();
                         
                         getEl('loading-overlay').classList.add('hidden');
                         if(syncIcon) syncIcon.classList.remove('sync-spin');
@@ -681,7 +1022,6 @@
                 }
                 await fetchAndProcessData(isManual);
             } catch (error) {
-                console.error("Fetch Error:", error);
                 showModal('error', 'Koneksi Terputus', 'Gagal memuat data. Akan menggunakan data tersimpan jika ada.');
                 getEl('loading-overlay').classList.add('hidden');
                 if(syncIcon) syncIcon.classList.remove('sync-spin');
@@ -691,21 +1031,23 @@
         async function fetchAndProcessData(isManual) {
             const response = await fetch(`${GAS_URL}?action=getAllData`);
             const result = await response.json();
-            
             db.employees = result.employees || [];
             db.attendance = result.attendance || [];
             db.overtime = result.overtime || [];
+            if(result.standards) db.standards = result.standards;
+            if(result.formasi) db.formasi = result.formasi;
             
             localStorage.setItem(CACHE_KEY, JSON.stringify(db));
             localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
 
             renderDashboard();
             if(!getEl('view-reports').classList.contains('hidden')) renderReports();
+            if(!getEl('view-formasi').classList.contains('hidden')) loadFormasiPlotting();
+            if(!getEl('view-lihat-formasi').classList.contains('hidden')) renderLihatFormasi();
             
             getEl('loading-overlay').classList.add('hidden');
             let syncIcon = getEl('sync-icon');
             if(syncIcon) syncIcon.classList.remove('sync-spin');
-            
             if(isManual) showModal('success', 'Tersinkronisasi', 'Semua data telah diperbarui dari server.');
         }
 
@@ -717,6 +1059,8 @@
                     db.employees = result.employees;
                     db.attendance = result.attendance;
                     db.overtime = result.overtime;
+                    if(result.standards) db.standards = result.standards;
+                    if(result.formasi) db.formasi = result.formasi;
                     localStorage.setItem(CACHE_KEY, JSON.stringify(db));
                     localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
                 }
@@ -738,33 +1082,39 @@
         }
 
         function navigate(page) {
-            ['dashboard', 'attendance', 'overtime', 'reports'].forEach(v => {
-                getEl(`view-${v}`).classList.add('hidden');
-                getEl(`nav-${v}`).classList.remove('sidebar-active');
+            ['dashboard', 'attendance', 'overtime', 'reports', 'formasi', 'lihat-formasi'].forEach(v => {
+                const view = getEl(`view-${v}`);
+                const nav = getEl(`nav-${v}`);
+                if(view) view.classList.add('hidden');
+                if(nav) nav.classList.remove('sidebar-active');
             });
             
-            getEl(`view-${page}`).classList.remove('hidden');
-            getEl(`nav-${page}`).classList.add('sidebar-active');
+            const tgtView = getEl(`view-${page}`);
+            const tgtNav = getEl(`nav-${page}`);
+            if(tgtView) tgtView.classList.remove('hidden');
+            if(tgtNav) tgtNav.classList.add('sidebar-active');
             
             const titles = {
                 'dashboard': 'Executive Dashboard',
+                'formasi': 'Formasi Mingguan',
+                'lihat-formasi': 'Lihat Jadwal Formasi',
                 'attendance': 'Input Kehadiran',
                 'overtime': 'Input Lembur',
                 'reports': 'Pusat Laporan & Analisis'
             };
-            getEl('page-title').innerText = titles[page];
+            getEl('page-title').innerText = titles[page] || '';
             
             const sidebar = getEl('sidebar');
             if(window.innerWidth < 768 && !sidebar.classList.contains('-translate-x-full')) toggleSidebar();
             
             if(page === 'dashboard') renderDashboard();
             if(page === 'reports') renderReports();
+            if(page === 'lihat-formasi') renderLihatFormasi();
         }
 
         function showModal(type, title, desc) {
             const modal = getEl('msg-modal');
             const icon = getEl('msg-icon');
-            
             if(type === 'success') icon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
             else if(type === 'error') icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
             else icon.innerHTML = '<i class="fas fa-info-circle text-blue-500"></i>';
@@ -786,6 +1136,671 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
+        function openStaffAuth() {
+            getEl('staff-pass').value = '';
+            const modal = getEl('staff-auth-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                getEl('staff-auth-content').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeStaffAuth() {
+            const modal = getEl('staff-auth-modal');
+            modal.classList.add('opacity-0');
+            getEl('staff-auth-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function checkStaffAuth() {
+            if(getEl('staff-pass').value === 'staff') {
+                closeStaffAuth();
+                setTimeout(openStaffSetting, 300);
+            } else {
+                showModal('error', 'Akses Ditolak', 'Password salah! Hubungi Staff terkait.');
+                getEl('staff-pass').value = '';
+            }
+        }
+
+        function openStaffSetting() {
+            renderLinesGrid();
+            if(!getEl('std-week').value) getEl('std-week').value = getWeekString(0);
+            loadStandard();
+            
+            const modal = getEl('staff-setting-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                getEl('staff-setting-content').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeStaffSetting() {
+            const modal = getEl('staff-setting-modal');
+            modal.classList.add('opacity-0');
+            getEl('staff-setting-content').classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function renderLinesGrid() {
+            const container = getEl('std-lines-grid');
+            container.innerHTML = linesList.map((line) => `
+                <label class="flex items-center p-3 border border-gray-200 rounded-xl bg-white cursor-pointer hover:bg-gray-50 transition-colors shadow-sm">
+                    <input type="checkbox" value="${line}" class="std-line-cb w-5 h-5 text-navy-900 focus:ring-navy-900 border-gray-300 rounded mr-3" onchange="handleLineSelection(this)">
+                    <span class="text-xs font-bold text-gray-700">${line}</span>
+                </label>
+            `).join('');
+        }
+
+        function handleLineSelection(checkbox) {
+            const checkedLines = document.querySelectorAll('.std-line-cb:checked');
+            if(checkedLines.length > 5) {
+                checkbox.checked = false;
+                showModal('info', 'Maksimal Line', 'Hanya dapat mengatur maksimal 5 line aktif untuk satu standard.');
+                return;
+            }
+            calculateMPP();
+        }
+
+        function handleStdDayChange(checkbox) {
+            const checkedDays = document.querySelectorAll('input[name="std_day"]:checked');
+            if(checkedDays.length > 6) {
+                checkbox.checked = false;
+                showModal('info', 'Batas Pilihan', 'Anda hanya dapat mengatur standard untuk maksimal 6 hari secara bersamaan.');
+                return;
+            }
+            if(checkedDays.length > 0) loadStandard(checkedDays[0].value);
+        }
+
+        function calculateMPP(overrideDay = null) {
+            const checkboxes = document.querySelectorAll('.std-line-cb:checked');
+            let selectedLines = Array.from(checkboxes).map(cb => cb.value);
+            let countLines = selectedLines.length;
+            let hasLine2SCO = selectedLines.includes('LINE 2 SCO');
+            
+            let checkedDays = document.querySelectorAll('input[name="std_day"]:checked');
+            let firstSelectedDay = checkedDays.length > 0 ? checkedDays[0].value : 'Senin';
+            let selectedDay = overrideDay || firstSelectedDay;
+            let isSaturday = (selectedDay === 'Sabtu');
+            
+            let mpp = 0;
+            if (countLines === 1) mpp = 6;
+            else if (countLines === 2) mpp = 9;
+            else if (countLines === 3) mpp = 10;
+            else if (countLines === 4) { mpp = hasLine2SCO ? 10 : 12; }
+            else if (countLines === 5) { mpp = hasLine2SCO ? 13 : 14; }
+            
+            if (isSaturday) mpp -= 1;
+            if (mpp < 0) mpp = 0;
+            
+            getEl('std-calc-mpp').innerText = mpp;
+            return { mpp, lines: selectedLines };
+        }
+
+        function loadStandard(specificDay = null) {
+            let week = getEl('std-week').value;
+            let checkedDays = document.querySelectorAll('input[name="std_day"]:checked');
+            let day = specificDay || (checkedDays.length > 0 ? checkedDays[0].value : null);
+            let shiftElement = document.querySelector('input[name="std_shift"]:checked');
+            let shift = shiftElement ? shiftElement.value : null;
+
+            if(!week || !day || !shift) {
+                document.querySelectorAll('.std-line-cb').forEach(cb => cb.checked = false);
+                calculateMPP();
+                return;
+            }
+            
+            let key = `${week}_${day}_${shift}`;
+            let data = db.standards[key] || { lines: [], mpp: 0 };
+            
+            document.querySelectorAll('.std-line-cb').forEach(cb => {
+                cb.checked = data.lines.includes(cb.value);
+            });
+            calculateMPP(day);
+        }
+
+        async function saveStandardData() {
+            let week = getEl('std-week').value;
+            let checkedDays = document.querySelectorAll('input[name="std_day"]:checked');
+            let shiftElement = document.querySelector('input[name="std_shift"]:checked');
+            
+            if(!week) return showModal('error', 'Gagal', 'Pilih minggu terlebih dahulu!');
+            if(checkedDays.length === 0) return showModal('error', 'Gagal', 'Pilih minimal satu hari (Maksimal 6 hari)!');
+            if(!shiftElement) return showModal('error', 'Gagal', 'Pilih shift!');
+            
+            let shift = shiftElement.value;
+            let daysList = Array.from(checkedDays).map(cb => cb.value);
+            
+            let payload = [];
+            daysList.forEach(day => {
+                let key = `${week}_${day}_${shift}`;
+                let { mpp, lines } = calculateMPP(day); 
+                db.standards[key] = { mpp, lines };
+                payload.push({ week: week, day: day, shift: shift, mpp: mpp, lines: lines.join(", ") });
+            });
+            
+            localStorage.setItem(STD_CACHE_KEY, JSON.stringify(db.standards));
+            
+            getEl('loading-overlay').classList.remove('hidden');
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addStandardBatch', data: payload })
+                });
+                const res = await response.json();
+                if(res.status === 'success') {
+                    showModal('success', 'Tersimpan', `Standard untuk ${daysList.join(', ')} (${shift}) berhasil disimpan ke Database.`);
+                    closeStaffSetting();
+                    
+                    if(!getEl('view-formasi').classList.contains('hidden')) loadFormasiPlotting();
+                    if(!getEl('view-lihat-formasi').classList.contains('hidden')) renderLihatFormasi();
+                } else throw new Error(res.message);
+            } catch (err) {
+                showModal('error', 'Gagal Koneksi', err.message || 'Koneksi ke database gagal.');
+            } finally {
+                getEl('loading-overlay').classList.add('hidden');
+            }
+        }
+
+        function loadFormasiPlotting() {
+            let week = getEl('plot-week').value;
+            let dayRadio = document.querySelector('input[name="plot_day"]:checked');
+            let day = dayRadio ? dayRadio.value : null;
+            let dept = getEl('plot-dept').value;
+            let group = getEl('plot-group').value;
+            
+            const container = getEl('plot-employee-container');
+            const infoCard = getEl('plot-info-card');
+            
+            if(!week || !day || !dept || !group) {
+                container.classList.add('hidden');
+                infoCard.classList.add('hidden');
+                return;
+            }
+
+            let shift = getAutomaticShift(week, group);
+            getEl('plot-shift-display').innerHTML = `<i class="fas fa-sync-alt mr-1 text-[9px] opacity-70"></i> ${shift}`;
+            getEl('plot-shift-hidden').value = shift;
+            
+            let stdKey = `${week}_${day}_${shift}`;
+            let stdData = db.standards[stdKey] || { mpp: 0, lines: [] };
+            
+            if(dept === 'DUMPING') {
+                getEl('plot-display-std').innerText = stdData.mpp > 0 ? stdData.mpp : '-';
+                getEl('plot-display-std-label').innerText = stdData.mpp > 0 ? 'Orang' : 'Belum diatur';
+                getEl('plot-display-lines').innerText = stdData.lines.length > 0 ? `Line: ${stdData.lines.join(', ')}` : 'Line: -';
+            } else {
+                getEl('plot-display-std').innerText = '-';
+                getEl('plot-display-std-label').innerText = '';
+                getEl('plot-display-lines').innerText = 'Standard spesifik hanya untuk Dumping';
+            }
+            
+            let filtered = db.employees.filter(e => e.Unit === dept && e.Grup === group && e.Status === "Aktif");
+            let formasiKey = `${week}_${day}_${shift}_${dept}_${group}`;
+            let savedFormasi = db.formasi[formasiKey] || {};
+            
+            const grid = getEl('plot-grid');
+            if(filtered.length === 0) {
+                grid.innerHTML = '<div class="p-6 text-center text-gray-500 font-bold text-sm">Tidak ada karyawan aktif di kriteria ini.</div>';
+            } else {
+                let html = '';
+                let jobs = jobDesks[dept] || ['OPERATOR'];
+
+                filtered.forEach(e => {
+                    let id = e["Employee ID"];
+                    let savedObj = savedFormasi[id];
+                    let status = 'Masuk';
+                    let savedJob = jobs[0];
+                    
+                    if(typeof savedObj === 'string') {
+                        status = savedObj;
+                    } else if (typeof savedObj === 'object' && savedObj !== null) {
+                        status = savedObj.status;
+                        savedJob = savedObj.job || jobs[0];
+                    } else if (savedObj === undefined) {
+                        status = 'Masuk';
+                    }
+
+                    let isMasuk = status === 'Masuk';
+                    
+                    let specificJobHTML = jobs.map(j => `<option value="${j}" ${j===savedJob?'selected':''}>${j}</option>`).join('');
+
+                    html += `
+                    <div class="fmt-emp-row flex flex-col items-start justify-between p-3 sm:p-4 bg-white rounded-xl shadow-sm border border-gray-100 gap-3 hover:border-gray-200 transition-colors" data-id="${id}">
+                        <div class="flex justify-between w-full items-center">
+                            <div>
+                                <div class="font-extrabold text-navy-900 text-xs sm:text-sm">${e.Nama}</div>
+                                <div class="flex flex-wrap items-center gap-2 mt-1">
+                                    <div class="text-[9px] sm:text-[10px] text-gray-400 font-mono font-semibold bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">ID: ${id}</div>
+                                </div>
+                            </div>
+                            <div class="flex bg-gray-50 rounded-lg p-1 border border-gray-200 w-auto">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="fmt_${id}" value="Masuk" class="fmt-radio peer hidden" ${isMasuk ? 'checked' : ''} onchange="toggleJobSelect(this)">
+                                    <div class="px-3 sm:px-5 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-md peer-checked:bg-green-500 peer-checked:text-white text-gray-500 text-center transition-all shadow-sm">Masuk</div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="fmt_${id}" value="Off" class="fmt-radio peer hidden" ${!isMasuk ? 'checked' : ''} onchange="toggleJobSelect(this)">
+                                    <div class="px-3 sm:px-5 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-md peer-checked:bg-red-500 peer-checked:text-white text-gray-500 text-center transition-all shadow-sm">Off</div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="w-full job-select-container ${isMasuk ? '' : 'hidden'} pl-1 border-l-2 border-blue-500">
+                            <select class="fmt-job-select w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-navy-900 focus:ring-1 focus:ring-blue-500 outline-none">
+                                ${specificJobHTML}
+                            </select>
+                        </div>
+                    </div>`;
+                });
+                grid.innerHTML = html;
+            }
+            
+            container.classList.remove('hidden');
+            infoCard.classList.remove('hidden');
+            infoCard.style.display = 'flex'; 
+            updateFormasiCount();
+
+            // Sembunyikan tombol simpan jika data sudah ada di database untuk mencegah double
+            const btnSave = getEl('btn-save-formasi');
+            if (btnSave) {
+                if (Object.keys(savedFormasi).length > 0) {
+                    btnSave.classList.add('hidden');
+                } else {
+                    btnSave.classList.remove('hidden');
+                }
+            }
+        }
+
+        function toggleJobSelect(radioElement) {
+            const row = radioElement.closest('.fmt-emp-row');
+            const jobContainer = row.querySelector('.job-select-container');
+            if(radioElement.value === 'Masuk') {
+                jobContainer.classList.remove('hidden');
+            } else {
+                jobContainer.classList.add('hidden');
+            }
+            updateFormasiCount();
+        }
+
+        function updateFormasiCount() {
+            const masukRadios = document.querySelectorAll('.fmt-radio[value="Masuk"]:checked');
+            getEl('plot-display-count').innerText = `${masukRadios.length} Orang`;
+            
+            let stdText = getEl('plot-display-std').innerText;
+            let std = parseInt(stdText) || 0;
+            
+            if(std > 0) {
+                if(masukRadios.length < std) {
+                    getEl('plot-display-count').className = "text-sm sm:text-base font-black text-orange-500 leading-none";
+                } else if (masukRadios.length > std) {
+                    getEl('plot-display-count').className = "text-sm sm:text-base font-black text-red-500 leading-none";
+                } else {
+                    getEl('plot-display-count').className = "text-sm sm:text-base font-black text-green-500 leading-none";
+                }
+            } else {
+                getEl('plot-display-count').className = "text-sm sm:text-base font-black text-navy-900 leading-none";
+            }
+        }
+
+        async function saveFormasi() {
+            let week = getEl('plot-week').value;
+            let day = document.querySelector('input[name="plot_day"]:checked').value;
+            let shift = getEl('plot-shift-hidden').value;
+            let dept = getEl('plot-dept').value;
+            let group = getEl('plot-group').value;
+            
+            let formasiKey = `${week}_${day}_${shift}_${dept}_${group}`;
+            let data = {};
+            let payload = [];
+            
+            document.querySelectorAll('.fmt-emp-row').forEach(row => {
+                let id = row.dataset.id;
+                let namaElement = row.querySelector('.font-extrabold');
+                let nama = namaElement ? namaElement.innerText : "";
+                let status = row.querySelector('.fmt-radio:checked').value;
+                let job = row.querySelector('.fmt-job-select').value;
+                
+                data[id] = { status: status, job: job };
+                payload.push({ week: week, day: day, shift: shift, dept: dept, group: group, id: id, nama: nama, status: status, job: job });
+            });
+            
+            if(payload.length === 0) return showModal('info', 'Kosong', 'Tidak ada data karyawan yang dipilih.');
+
+            db.formasi[formasiKey] = data;
+            localStorage.setItem(FMT_CACHE_KEY, JSON.stringify(db.formasi));
+            
+            getEl('loading-overlay').classList.remove('hidden');
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addPlottingBatch', data: payload })
+                });
+                const res = await response.json();
+                if(res.status === 'success') {
+                    showModal('success', 'Formasi Disimpan', 'Plotting formasi harian berhasil disimpan ke Database.');
+                    loadFormasiPlotting(); // Reload agar tombol simpan hilang
+                } else throw new Error(res.message);
+            } catch (err) {
+                showModal('error', 'Gagal Koneksi', err.message || 'Koneksi ke database gagal.');
+            } finally {
+                getEl('loading-overlay').classList.add('hidden');
+            }
+        }
+
+        function shareFormasiWhatsApp() {
+            let week = getEl('plot-week').value;
+            let day = document.querySelector('input[name="plot_day"]:checked').value;
+            let shift = getEl('plot-shift-hidden').value;
+            let dept = getEl('plot-dept').value;
+            let group = getEl('plot-group').value;
+            
+            let formasiKey = `${week}_${day}_${shift}_${dept}_${group}`;
+            let data = db.formasi[formasiKey] || {};
+            
+            let stdKey = `${week}_${day}_${shift}`;
+            let stdData = db.standards[stdKey] || { mpp: 0, lines: [] };
+            
+            if(Object.keys(data).length === 0) {
+                document.querySelectorAll('.fmt-emp-row').forEach(row => {
+                    let id = row.dataset.id;
+                    let status = row.querySelector('.fmt-radio:checked').value;
+                    let job = row.querySelector('.fmt-job-select').value;
+                    data[id] = { status: status, job: job };
+                });
+            }
+
+            if(Object.keys(data).length === 0) return showModal('info', 'Data Kosong', 'Tidak ada data formasi untuk dibagikan.');
+
+            const selWeek = getEl('plot-week');
+            const weekText = selWeek.options[selWeek.selectedIndex].text;
+
+            let text = `*FORMASI KERJA MINGGUAN*\n`;
+            text += `📅 ${weekText}\n`;
+            text += `📍 Hari: ${day}\n`;
+            text += `⏰ Shift: ${shift}\n`;
+            text += `🏢 Unit: ${dept}\n`;
+            text += `👥 Grup: ${group}\n\n`;
+            
+            if(dept === 'DUMPING') {
+                text += `*🔧 Line Jalan:* ${stdData.lines.length > 0 ? stdData.lines.join(', ') : '-'}\n`;
+                text += `*🎯 Target MPP:* ${stdData.mpp} Orang\n\n`;
+            }
+            
+            text += `*Daftar Karyawan:*\n`;
+            
+            let masukCount = 0;
+            let filtered = db.employees.filter(e => e.Unit === dept && e.Grup === group && e.Status === "Aktif");
+            
+            filtered.forEach((e, i) => {
+                let id = e["Employee ID"];
+                let savedObj = data[id];
+                let status = 'Masuk';
+                let job = '';
+                
+                if(typeof savedObj === 'string') status = savedObj;
+                else if (typeof savedObj === 'object' && savedObj !== null) {
+                    status = savedObj.status;
+                    job = savedObj.job;
+                }
+                
+                let stIcon = status === 'Masuk' ? '✅' : '❌';
+                if(status === 'Masuk') {
+                    masukCount++;
+                    text += `${i+1}. ${e.Nama} [${status}] ${stIcon}\n    Job: ${job}\n`;
+                } else {
+                    text += `${i+1}. ${e.Nama} [${status}] ${stIcon}\n`;
+                }
+            });
+            
+            text += `\n*📈 Total Masuk:* ${masukCount} Orang`;
+            if(dept === 'DUMPING' && stdData.mpp > 0) {
+                if(masukCount < stdData.mpp) text += ` (Kurang ${stdData.mpp - masukCount} Orang)`;
+                else if (masukCount > stdData.mpp) text += ` (Lebih ${masukCount - stdData.mpp} Orang)`;
+                else text += ` (PAS/SESUAI)`;
+            }
+            
+            const encodedText = encodeURIComponent(text);
+            window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+        }
+
+        function renderLihatFormasi() {
+            let weekType = document.querySelector('input[name="lihat_week_type"]:checked').value;
+            let week = weekType === 'current' ? getWeekString(0) : getWeekString(1);
+            let deptVal = getEl('lihat-dept').value;
+            let groupVal = getEl('lihat-group').value;
+            const container = getEl('lihat-schedule-container');
+            const headerInfo = getEl('lihat-schedule-header');
+            
+            if(!deptVal || !groupVal) {
+                container.innerHTML = `<div class="col-span-full py-8 text-center text-gray-500 font-bold">Silakan pilih Unit dan Grup.</div>`;
+                headerInfo.classList.add('hidden');
+                return;
+            }
+
+            let weekSplit = week.split('-W');
+            let weekDisp = weekSplit.length === 2 ? `Minggu ${parseInt(weekSplit[1])} (${weekSplit[0]})` : week;
+            let shiftDisp = groupVal === 'ALL' ? 'MIXED SHIFT' : getAutomaticShift(week, groupVal);
+
+            headerInfo.innerHTML = `Formasi <span class="text-blue-600">${weekDisp}</span> | 🏢 <span class="text-blue-600">${deptVal}</span> | 👥 <span class="text-blue-600">${groupVal}</span> | ⏰ <span class="text-blue-600">${shiftDisp}</span>`;
+            headerInfo.classList.remove('hidden');
+
+            let filteredEmployees = db.employees.filter(e => e.Status === "Aktif");
+            if (deptVal !== 'ALL') filteredEmployees = filteredEmployees.filter(e => e.Unit === deptVal);
+            if (groupVal !== 'ALL') filteredEmployees = filteredEmployees.filter(e => e.Grup === groupVal);
+
+            if(filteredEmployees.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-8 text-center text-gray-500 font-bold">Tidak ada karyawan sesuai kriteria.</div>`;
+                return;
+            }
+
+            const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+            let html = '';
+
+            days.forEach(day => {
+                let masukList = [];
+                
+                filteredEmployees.forEach(e => {
+                    let shift = getAutomaticShift(week, e.Grup);
+                    let formasiKey = `${week}_${day}_${shift}_${e.Unit}_${e.Grup}`;
+                    let data = db.formasi[formasiKey];
+                    if (data) {
+                        let obj = data[e["Employee ID"]];
+                        let status = typeof obj === 'string' ? obj : (obj ? obj.status : '');
+                        let job = typeof obj === 'object' ? obj.job : '-';
+                        if (status === 'Masuk') {
+                            masukList.push({ name: e.Nama.split(' ')[0], job: job, unit: e.Unit, grup: e.Grup });
+                        }
+                    }
+                });
+
+                html += `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-navy-900 text-white flex justify-between px-3 py-2 items-center">
+                        <span class="font-bold text-sm uppercase tracking-wider">${day}</span>
+                        <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-md font-bold">${masukList.length} Org</span>
+                    </div>
+                    <div class="p-3">
+                        <div class="space-y-2">`;
+                
+                if (masukList.length > 0) {
+                    masukList.forEach(m => {
+                        let badgeExt = '';
+                        if (deptVal === 'ALL' || groupVal === 'ALL') {
+                            badgeExt = `<span class="text-[8px] text-gray-400 font-mono ml-1">(${m.unit}-${m.grup})</span>`;
+                        }
+                        html += `
+                        <div class="flex justify-between items-center text-xs pb-1 border-b border-gray-50">
+                            <span class="font-bold text-gray-700">${m.name} ${badgeExt}</span>
+                            <span class="text-[9px] font-semibold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">${m.job}</span>
+                        </div>`;
+                    });
+                } else {
+                    html += `<div class="text-[10px] text-gray-400 italic text-center py-4">Belum diset / Kosong</div>`;
+                }
+
+                html += `</div></div></div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function shareLihatFormasiWhatsApp() {
+            let weekType = document.querySelector('input[name="lihat_week_type"]:checked').value;
+            let week = weekType === 'current' ? getWeekString(0) : getWeekString(1);
+            let deptVal = getEl('lihat-dept').value;
+            let groupVal = getEl('lihat-group').value;
+
+            if(!deptVal || !groupVal) return showModal('info', 'Pilih Data', 'Pilih Unit dan Grup terlebih dahulu.');
+
+            let weekSplit = week.split('-W');
+            let weekDisp = weekSplit.length === 2 ? `Minggu ke-${parseInt(weekSplit[1])} (${weekSplit[0]})` : week;
+
+            let text = `*JADWAL FORMASI MINGGUAN*\n`;
+            text += `Periode: ${weekDisp}\n`;
+            text += `Unit: ${deptVal}\n`;
+            text += `Grup: ${groupVal}\n\n`;
+
+            let filteredEmployees = db.employees.filter(e => e.Status === "Aktif");
+            if (deptVal !== 'ALL') filteredEmployees = filteredEmployees.filter(e => e.Unit === deptVal);
+            if (groupVal !== 'ALL') filteredEmployees = filteredEmployees.filter(e => e.Grup === groupVal);
+
+            const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+
+            days.forEach(day => {
+                text += `*${day}*\n`;
+                let count = 0;
+                filteredEmployees.forEach(e => {
+                    let shift = getAutomaticShift(week, e.Grup);
+                    let formasiKey = `${week}_${day}_${shift}_${e.Unit}_${e.Grup}`;
+                    let data = db.formasi[formasiKey];
+                    if (data && data[e["Employee ID"]]) {
+                        let obj = data[e["Employee ID"]];
+                        let status = typeof obj === 'string' ? obj : obj.status;
+                        let job = typeof obj === 'object' ? obj.job : '-';
+                        if (status === 'Masuk') {
+                            count++;
+                            let ext = (deptVal === 'ALL' || groupVal === 'ALL') ? ` [${e.Unit}-${e.Grup}]` : '';
+                            text += `- ${e.Nama.split(' ')[0]}${ext} (${job})\n`;
+                        }
+                    }
+                });
+                if(count === 0) text += `- Kosong/Belum diset\n`;
+                text += `\n`;
+            });
+
+            const encodedText = encodeURIComponent(text);
+            window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+        }
+        
+        function exportFormasiToExcel() {
+            let weekType = document.querySelector('input[name="lihat_week_type"]:checked').value;
+            let week = weekType === 'current' ? getWeekString(0) : getWeekString(1);
+            let deptVal = getEl('lihat-dept').value;
+            let groupVal = getEl('lihat-group').value;
+            
+            if(!deptVal || !groupVal) return showModal('info', 'Pilih Data', 'Pilih Unit dan Grup sebelum export.');
+            
+            let shiftDisp = groupVal === 'ALL' ? 'MIXED SHIFT' : getAutomaticShift(week, groupVal);
+            let weekSplit = week.split('-W');
+            let weekDisp = weekSplit.length === 2 ? `Minggu ke-${parseInt(weekSplit[1])} Tahun ${weekSplit[0]}` : week;
+            
+            const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+            let filteredEmployees = db.employees.filter(e => e.Status === "Aktif");
+            if (deptVal !== 'ALL') filteredEmployees = filteredEmployees.filter(e => e.Unit === deptVal);
+            if (groupVal !== 'ALL') filteredEmployees = filteredEmployees.filter(e => e.Grup === groupVal);
+            
+            let tableHTML = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+                <meta charset="UTF-8">
+                <!--[if gte mso 9]>
+                <xml>
+                    <x:ExcelWorkbook>
+                        <x:ExcelWorksheets>
+                            <x:ExcelWorksheet>
+                                <x:Name>Formasi</x:Name>
+                                <x:WorksheetOptions>
+                                    <x:DisplayGridlines/>
+                                </x:WorksheetOptions>
+                            </x:ExcelWorksheet>
+                        </x:ExcelWorksheets>
+                    </x:ExcelWorkbook>
+                </xml>
+                <![endif]-->
+            </head>
+            <body>
+            <table border="1" cellpadding="3" cellspacing="0" style="font-family: Arial, sans-serif;">
+                <tr>
+                    <th colspan="11" style="font-size: 16px; font-weight: bold; text-align: left; background-color: #f0f4f8;">FORMASI MINGGUAN - ${deptVal} (${groupVal})</th>
+                </tr>
+                <tr>
+                    <td colspan="2" style="font-weight: bold;">Periode</td>
+                    <td colspan="9">${weekDisp}</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="font-weight: bold;">Shift Default</td>
+                    <td colspan="9">${shiftDisp}</td>
+                </tr>
+                <tr><td colspan="11"></td></tr>
+                <tr style="background-color: #0a192f; color: #ffffff; font-weight: bold; text-align: center;">
+                    <th>NIK</th>
+                    <th>NAMA KARYAWAN</th>
+                    <th>UNIT</th>
+                    <th>GRUP</th>
+                    <th>SENIN</th>
+                    <th>SELASA</th>
+                    <th>RABU</th>
+                    <th>KAMIS</th>
+                    <th>JUMAT</th>
+                    <th>SABTU</th>
+                    <th>MINGGU</th>
+                </tr>`;
+            
+            filteredEmployees.forEach(e => {
+                let id = e["Employee ID"];
+                let name = e.Nama;
+                tableHTML += `<tr>
+                    <td style="text-align: center; mso-number-format:'\@';">${id}</td>
+                    <td>${name}</td>
+                    <td style="text-align: center;">${e.Unit}</td>
+                    <td style="text-align: center;">${e.Grup}</td>`;
+                
+                days.forEach(day => {
+                    let shift = getAutomaticShift(week, e.Grup);
+                    let formasiKey = `${week}_${day}_${shift}_${e.Unit}_${e.Grup}`;
+                    let data = db.formasi[formasiKey];
+                    let cellVal = 'Off'; 
+                    
+                    if (data) {
+                        let obj = data[id];
+                        let status = typeof obj === 'string' ? obj : (obj ? obj.status : '');
+                        let job = typeof obj === 'object' ? obj.job : '';
+                        
+                        if (status === 'Masuk') {
+                            cellVal = job || 'Masuk';
+                        }
+                    } else {
+                        cellVal = '-';
+                    }
+                    
+                    let cellStyle = cellVal === 'Off' ? 'color: red;' : (cellVal === '-' ? 'color: gray;' : 'color: black;');
+                    tableHTML += `<td style="text-align: center; ${cellStyle}">${cellVal}</td>`;
+                });
+                tableHTML += `</tr>`;
+            });
+            
+            tableHTML += `</table></body></html>`;
+            
+            const blob = new Blob([tableHTML], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Formasi_${deptVal}_${groupVal}_${week}.xls`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function showDetails(empId, empName, type) {
             let selectId = 'dash-periode';
             if (!getEl('view-reports').classList.contains('hidden')) {
@@ -802,7 +1817,6 @@
             if (type === 'absen') {
                 getEl('detail-subtitle').innerText = 'Rincian Tidak Masuk';
                 const absents = db.attendance.filter(a => String(a["Employee ID"]) === String(empId) && ['ALPHA', 'SAKIT', 'IZIN', 'CUTI'].includes(a.Status) && isDateInRange(a.Tanggal, range.start, range.end));
-                
                 absents.sort((a, b) => new Date(b.Tanggal) - new Date(a.Tanggal));
 
                 if (absents.length === 0) {
@@ -828,7 +1842,6 @@
             } else if (type === 'lembur') {
                 getEl('detail-subtitle').innerText = 'Rincian Lembur';
                 const overtimes = db.overtime.filter(o => String(o["Employee ID"]) === String(empId) && isDateInRange(o.Tanggal, range.start, range.end));
-                
                 overtimes.sort((a, b) => new Date(b.Tanggal) - new Date(a.Tanggal));
 
                 if (overtimes.length === 0) {
@@ -853,7 +1866,6 @@
             }
 
             getEl('detail-list').innerHTML = listHTML;
-            
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
@@ -882,9 +1894,7 @@
             if (!dbDate || !inputDate) return false;
             let d1 = String(dbDate).trim();
             let d2 = String(inputDate).trim();
-            
             if (d1 === d2) return true;
-            
             try {
                 const d = new Date(d1);
                 if (!isNaN(d.getTime())) {
@@ -894,9 +1904,7 @@
                     if (`${year}-${month}-${day}` === d2) return true;
                 }
             } catch(e) {}
-            
             if (d1.includes('T') && d1.split('T')[0] === d2) return true;
-            
             return false;
         };
         
@@ -938,14 +1946,11 @@
             let otListHTML = '';
             
             if(sortedTopOt.length === 0) {
-                otListHTML = `<div class="flex-1 flex flex-col items-center justify-center text-gray-400 font-bold">
-                    <i class="fas fa-bed text-4xl sm:text-5xl mb-3 opacity-20"></i>
-                    <p class="text-xs sm:text-sm">Tidak ada catatan lembur</p>
-                </div>`;
+                otListHTML = `<div class="flex-1 flex flex-col items-center justify-center text-gray-400 font-bold"><i class="fas fa-bed text-4xl sm:text-5xl mb-3 opacity-20"></i><p class="text-xs sm:text-sm">Tidak ada catatan lembur</p></div>`;
             } else {
                 sortedTopOt.forEach((data, index) => {
                     otListHTML += `
-                    <div onclick="showDetails('${data.id}', '${data.name}', 'lembur')" title="Klik untuk lihat tanggal" class="cursor-pointer flex items-center justify-between p-2 sm:p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-silver-400 hover:bg-gray-50 transition-all">
+                    <div onclick="showDetails('${data.id}', '${data.name}', 'lembur')" class="cursor-pointer flex items-center justify-between p-2 sm:p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-silver-400 hover:bg-gray-50 transition-all">
                         <div class="flex items-center gap-2 sm:gap-3">
                             <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-silver-300 to-silver-500 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow-sm">${index + 1}</div>
                             <div>
@@ -972,17 +1977,14 @@
             });
             
             let sortedWorst = Object.values(empAbsence).sort((a,b) => b.count - a.count).slice(0, 5);
-            
             let listHTML = '';
+            
             if(sortedWorst.length === 0) {
-                listHTML = `<div class="flex-1 flex flex-col items-center justify-center text-gray-400 font-bold">
-                    <i class="fas fa-shield-check text-4xl sm:text-5xl mb-3 opacity-20 text-green-500"></i>
-                    <p class="text-xs sm:text-sm">Disiplin kerja sempurna</p>
-                </div>`;
+                listHTML = `<div class="flex-1 flex flex-col items-center justify-center text-gray-400 font-bold"><i class="fas fa-shield-check text-4xl sm:text-5xl mb-3 opacity-20 text-green-500"></i><p class="text-xs sm:text-sm">Disiplin kerja sempurna</p></div>`;
             } else {
                 sortedWorst.forEach((data, index) => {
                     listHTML += `
-                    <div onclick="showDetails('${data.id}', '${data.name}', 'absen')" title="Klik untuk lihat tanggal" class="cursor-pointer flex items-center justify-between p-2 sm:p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-red-300 hover:bg-red-50/30 transition-all">
+                    <div onclick="showDetails('${data.id}', '${data.name}', 'absen')" class="cursor-pointer flex items-center justify-between p-2 sm:p-3 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-red-300 hover:bg-red-50/30 transition-all">
                         <div class="flex items-center gap-2 sm:gap-3">
                             <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-red-50 text-red-600 border border-red-100 flex items-center justify-center font-black text-xs sm:text-sm shadow-sm">${index + 1}</div>
                             <div>
@@ -1028,7 +2030,6 @@
                 let html = '';
                 filtered.forEach(e => {
                     const id = e["Employee ID"];
-                    
                     const checkId = String(id).trim();
                     const savedData = db.attendance.find(a => isSameDate(a.Tanggal, date) && String(a["Employee ID"]).trim() === checkId);
                     const isSaved = !!savedData;
@@ -1056,7 +2057,9 @@
                     <div class="att-emp-card ${cardStyle} rounded-xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2 transition-shadow" data-nama="${e["Nama"]}">
                         <div>
                             <div class="font-extrabold text-navy-900 text-sm sm:text-base">${e["Nama"]}</div>
-                            <div class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold mt-0.5">ID: ${id}</div>
+                            <div class="flex flex-wrap gap-2 mt-0.5">
+                                <div class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold">ID: ${id}</div>
+                            </div>
                             ${badge}
                         </div>
                         <div class="flex flex-wrap gap-1.5 sm:gap-2 sm:w-auto w-full">
@@ -1117,7 +2120,6 @@
                     btnSubmitAtt.classList.remove('hidden');
                 }
             }
-            
             container.classList.remove('hidden');
         }
 
@@ -1158,7 +2160,6 @@
             }
 
             const savedData = db.attendance.filter(a => isSameDate(a.Tanggal, date) && a.Unit === dept && a.Grup === group);
-
             if(savedData.length === 0) {
                 return showModal('info', 'Tidak Ada Data Tersimpan', 'Belum ada data kehadiran yang tersimpan di sistem untuk pencarian ini.');
             }
@@ -1201,7 +2202,6 @@
                 if(radios.length > 0) {
                     const id = radios[0].name.split('_')[1];
                     const nama = card.getAttribute('data-nama');
-                    
                     const checked = card.querySelector(`input[name="st_${id}"]:checked:not(:disabled)`);
                     
                     if(checked) {
@@ -1242,10 +2242,8 @@
                 if(res.status === 'success') {
                     payloadData.forEach(p => db.attendance.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Unit": p.dept, "Grup": p.grup, "Status": p.status}));
                     localStorage.setItem(CACHE_KEY, JSON.stringify(db));
-                    
                     loadEmployeesForAttendance();
                     shareWhatsAppAttendance();
-
                 } else throw new Error(res.message);
             } catch (err) {
                 showModal('error', 'Gagal', err.message || 'Koneksi ke database gagal.');
@@ -1281,7 +2279,6 @@
                 let html = '';
                 filtered.forEach(e => {
                     const id = e["Employee ID"];
-                    
                     const checkId = String(id).trim();
                     const savedData = db.overtime.find(o => isSameDate(o.Tanggal, date) && String(o["Employee ID"]).trim() === checkId);
                     
@@ -1297,7 +2294,9 @@
                             <input type="checkbox" value="${id}" data-nama="${e["Nama"]}" class="ot-emp-check w-5 h-5 sm:w-6 sm:h-6 text-silver-500 border-gray-300 rounded focus:ring-silver-400 mr-3 sm:mr-4 ${isSaved ? 'bg-gray-200' : 'bg-gray-50'}" onchange="checkOvertimeSelection()" ${disabledAttr}>
                             <div class="flex flex-col">
                                 <span class="font-extrabold text-navy-900 text-xs sm:text-sm">${e["Nama"]}</span>
-                                <span class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold mt-0.5">ID: ${id}</span>
+                                <div class="flex flex-wrap items-center gap-2 mt-0.5">
+                                    <span class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold">ID: ${id}</span>
+                                </div>
                             </div>
                             ${badge}
                         </label>
@@ -1306,9 +2305,7 @@
                 grid.innerHTML = html;
             }
             
-            // Evaluasi tombol simpan sesuai request: tersembunyi hingga ada yg di klik
             checkOvertimeSelection();
-            
             getEl('ot-select-all').checked = false;
             container.classList.remove('hidden');
         }
@@ -1334,7 +2331,6 @@
             checkOvertimeSelection();
         }
 
-        // Logic Baru: Evaluasi status tombol Simpan Lembur 
         function checkOvertimeSelection() {
             const checks = document.querySelectorAll('.ot-emp-check:checked:not(:disabled)');
             const btnSubmitOt = getEl('btn-submit-ot');
@@ -1357,7 +2353,6 @@
             }
 
             const savedData = db.overtime.filter(o => isSameDate(o.Tanggal, date) && o.Unit === dept && o.Grup === group);
-
             if(savedData.length === 0) return showModal('info', 'Tidak Ada Data Tersimpan', 'Belum ada data lembur yang tersimpan untuk filter ini.');
 
             const dateObj = new Date(date);
@@ -1435,11 +2430,8 @@
                     
                     getEl('ot-remarks').value = '';
                     getEl('ot-select-all').checked = false;
-                    
                     loadEmployeesForOvertime(); 
-
                     shareWhatsApp();
-
                 } else throw new Error(res.message);
             } catch (err) {
                 showModal('error', 'Gagal', err.message || 'Koneksi ke database gagal.');
