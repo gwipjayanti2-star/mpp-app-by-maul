@@ -207,7 +207,6 @@
                     <select id="dash-periode" class="w-full sm:w-64 bg-gray-50 border-0 text-navy-900 text-xs sm:text-sm md:text-base rounded-xl focus:ring-2 focus:ring-navy-900 p-2.5 sm:p-3 font-bold shadow-inner cursor-pointer" onchange="renderDashboard()"></select>
                 </div>
 
-                <!-- KPI Cards -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                     <div class="glass-card rounded-2xl p-3 sm:p-4 shadow-soft hover:shadow-md transition-shadow relative overflow-hidden group">
                         <div class="absolute -right-2 -top-2 w-16 h-16 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-500 ease-out z-0"></div>
@@ -310,7 +309,7 @@
                             
                             <div class="md:col-span-12 mt-1 sm:mt-2">
                                 <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-2">
-                                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide">Pilih Hari Formasi</label>
+                                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide">Pilih Hari Formasi (Maksimal 6 Hari)</label>
                                     <div class="flex items-center bg-indigo-50/50 px-2.5 py-1 rounded-lg border border-indigo-100/50">
                                         <span class="text-[9px] sm:text-[10px] text-gray-500 font-semibold mr-2 uppercase tracking-wider">Rotasi Shift:</span>
                                         <div id="plot-shift-display" class="px-2 py-0.5 bg-white border border-indigo-200 rounded text-indigo-600 font-extrabold text-[10px] sm:text-xs shadow-sm flex items-center">
@@ -326,8 +325,8 @@
                                         daysList.forEach((day, idx) => {
                                             document.write(`
                                             <label class="flex-1 min-w-[50px] sm:min-w-[0] cursor-pointer text-center relative group">
-                                                <input type="radio" name="plot_day" value="${day}" class="peer hidden" ${idx===0 ? 'checked' : ''} onchange="loadFormasiPlotting()">
-                                                <div class="py-1.5 sm:py-2 text-[10px] sm:text-[11px] font-bold text-gray-500 rounded-lg peer-checked:bg-white peer-checked:text-navy-900 peer-checked:shadow-sm transition-all duration-300 hover:text-gray-700">${day}</div>
+                                                <input type="checkbox" name="plot_day" value="${day}" class="peer hidden" ${idx===0 ? 'checked' : ''} onchange="handlePlotDayChange(this)">
+                                                <div class="py-1.5 sm:py-2 text-[10px] sm:text-[11px] font-bold text-gray-500 rounded-lg peer-checked:bg-navy-900 peer-checked:text-white peer-checked:shadow-sm transition-all duration-300 hover:text-gray-700 hover:peer-checked:text-white">${day}</div>
                                             </label>
                                             `);
                                         });
@@ -388,32 +387,69 @@
                     </div>
                     
                     <div class="p-4 sm:p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-5 sm:mb-6 bg-gray-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100">
-                            <div>
-                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Tanggal</label>
-                                <input type="date" id="att-date" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-navy-900 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all" onchange="loadEmployeesForAttendance()">
+                        <div class="flex flex-col gap-3 sm:gap-4 mb-5 sm:mb-6 bg-gray-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100 shadow-inner">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                                <div>
+                                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Tanggal</label>
+                                    <input type="date" id="att-date" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all" onchange="loadEmployeesForAttendance()">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Grup Shift</label>
+                                    <select id="att-group" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all cursor-pointer" onchange="loadEmployeesForAttendance()">
+                                        <option value="">-- Pilih Grup --</option>
+                                        <option value="Grup A">Grup A</option>
+                                        <option value="Grup B">Grup B</option>
+                                        <option value="Grup C">Grup C</option>
+                                        <option value="NON SHIFT">NON SHIFT</option>
+                                    </select>
+                                </div>
                             </div>
                             <div>
-                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Unit Kerja</label>
-                                <select id="att-dept" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-navy-900 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all cursor-pointer" onchange="loadEmployeesForAttendance()">
-                                    <option value="">-- Pilih Unit --</option>
-                                    <option value="DUMPING">DUMPING</option>
-                                    <option value="CRUSHER">CRUSHER</option>
-                                    <option value="CCP">CCP</option>
-                                    <option value="MHS">MHS</option>
-                                    <option value="GWIP">GWIP</option>
-                                    <option value="ADMIN GWIP">ADMIN GWIP</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Grup Shift</label>
-                                <select id="att-group" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-navy-900 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all cursor-pointer" onchange="loadEmployeesForAttendance()">
-                                    <option value="">-- Pilih Grup --</option>
-                                    <option value="Grup A">Grup A</option>
-                                    <option value="Grup B">Grup B</option>
-                                    <option value="Grup C">Grup C</option>
-                                    <option value="NON SHIFT">NON SHIFT</option>
-                                </select>
+                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Pilih Unit Kerja <span class="text-indigo-500 lowercase normal-case">(Maksimal 4)</span></label>
+                                <div class="flex w-full gap-1 sm:gap-1.5" id="att-dept-container">
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="DUMPING" class="att-dept-cb peer hidden" onchange="handleAttDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-truck-loading text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">DUMPING</span>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="CRUSHER" class="att-dept-cb peer hidden" onchange="handleAttDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-cogs text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">CRUSHER</span>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="CCP" class="att-dept-cb peer hidden" onchange="handleAttDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-shield-alt text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">CCP</span>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="MHS" class="att-dept-cb peer hidden" onchange="handleAttDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-box-open text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">MHS</span>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="GWIP" class="att-dept-cb peer hidden" onchange="handleAttDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-warehouse text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">GWIP</span>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="ADMIN GWIP" class="att-dept-cb peer hidden" onchange="handleAttDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-desktop text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">ADM GWIP</span>
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -458,58 +494,95 @@
                         </div>
                     </div>
                     <div class="p-4 sm:p-6">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-5 bg-gray-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100">
-                            <div>
-                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Tanggal</label>
-                                <input type="date" id="ot-date" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-silver-400 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all" onchange="loadEmployeesForOvertime()">
+                        <div class="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-5 bg-gray-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100 shadow-inner">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                                <div>
+                                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Tanggal</label>
+                                    <input type="date" id="ot-date" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all" onchange="loadEmployeesForOvertime()">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Grup</label>
+                                    <select id="ot-group" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all cursor-pointer" onchange="loadEmployeesForOvertime()">
+                                        <option value="">-- Pilih --</option>
+                                        <option value="Grup A">Grup A</option>
+                                        <option value="Grup B">Grup B</option>
+                                        <option value="Grup C">Grup C</option>
+                                        <option value="NON SHIFT">NON SHIFT</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Durasi</label>
+                                    <select id="ot-hours" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all cursor-pointer font-bold text-navy-900">
+                                        <option value="3.5">3.5 Jam (Setengah hari)</option>
+                                        <option value="7.5">7.5 Jam (Longshift)</option>
+                                        <option value="10">10 Jam (Lembur Libur)</option>
+                                        <option value="14">14 Jam (Lembur Full Libur)</option>
+                                    </select>
+                                </div>
                             </div>
                             <div>
-                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Unit</label>
-                                <select id="ot-dept" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-silver-400 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all cursor-pointer" onchange="loadEmployeesForOvertime()">
-                                    <option value="">-- Pilih --</option>
-                                    <option value="DUMPING">DUMPING</option>
-                                    <option value="CRUSHER">CRUSHER</option>
-                                    <option value="CCP">CCP</option>
-                                    <option value="MHS">MHS</option>
-                                    <option value="GWIP">GWIP</option>
-                                    <option value="ADMIN GWIP">ADMIN GWIP</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Grup</label>
-                                <select id="ot-group" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-silver-400 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all cursor-pointer" onchange="loadEmployeesForOvertime()">
-                                    <option value="">-- Pilih --</option>
-                                    <option value="Grup A">Grup A</option>
-                                    <option value="Grup B">Grup B</option>
-                                    <option value="Grup C">Grup C</option>
-                                    <option value="NON SHIFT">NON SHIFT</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Durasi</label>
-                                <select id="ot-hours" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-silver-400 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all cursor-pointer font-bold text-navy-900">
-                                    <option value="3.5">3.5 Jam (Setengah hari)</option>
-                                    <option value="7.5">7.5 Jam (Longshift)</option>
-                                    <option value="10">10 Jam (Lembur Libur)</option>
-                                    <option value="14">14 Jam (Lembur Full Libur)</option>
-                                </select>
+                                <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Pilih Unit <span class="text-indigo-500 lowercase normal-case">(Maksimal 4)</span></label>
+                                <div class="flex w-full gap-1 sm:gap-1.5" id="ot-dept-container">
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="DUMPING" class="ot-dept-cb peer hidden" onchange="handleOtDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-truck-loading text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">DUMPING</span>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="CRUSHER" class="ot-dept-cb peer hidden" onchange="handleOtDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-cogs text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">CRUSHER</span>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="CCP" class="ot-dept-cb peer hidden" onchange="handleOtDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-shield-alt text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">CCP</span>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="MHS" class="ot-dept-cb peer hidden" onchange="handleOtDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-box-open text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">MHS</span>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="GWIP" class="ot-dept-cb peer hidden" onchange="handleOtDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-warehouse text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">GWIP</span>
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer relative flex-1 min-w-0">
+                                        <input type="checkbox" value="ADMIN GWIP" class="ot-dept-cb peer hidden" onchange="handleOtDeptChange(this)">
+                                        <div class="h-full flex flex-col items-center justify-center py-1 sm:py-1.5 px-0.5 bg-white border border-gray-200 rounded-md text-[7px] sm:text-[9px] font-bold text-gray-500 transition-all shadow-sm peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-gray-50 text-center leading-none">
+                                            <i class="fas fa-desktop text-[9px] sm:text-[11px] opacity-80 mb-0.5"></i>
+                                            <span class="truncate w-full">ADM GWIP</span>
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                         
                         <div class="mb-5 sm:mb-6">
                             <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Keterangan Pekerjaan</label>
-                            <input type="text" id="ot-remarks" placeholder="Contoh: Pencapaian target produksi material..." class="w-full p-3 sm:p-3.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-silver-400 focus:bg-white text-xs sm:text-sm shadow-inner transition-all">
+                            <input type="text" id="ot-remarks" placeholder="Contoh: Pencapaian target produksi material..." class="w-full p-3 sm:p-3.5 bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:bg-white text-xs sm:text-sm shadow-inner transition-all">
                         </div>
 
                         <div id="ot-employee-list-container" class="hidden">
                             <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
                                 <label class="flex items-center w-full sm:w-auto cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                                    <input type="checkbox" id="ot-select-all" class="w-5 h-5 sm:w-6 sm:h-6 text-silver-500 bg-white border-gray-300 rounded focus:ring-silver-400" onchange="toggleAllOvertime()">
+                                    <input type="checkbox" id="ot-select-all" class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500 bg-white border-gray-300 rounded focus:ring-indigo-400" onchange="toggleAllOvertime()">
                                     <span class="ml-2 sm:ml-3 font-bold text-navy-900 text-xs sm:text-sm select-none">Pilih Semua Karyawan</span>
                                 </label>
                                 <div class="relative w-full sm:w-72">
                                     <i class="fas fa-search absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs sm:text-sm"></i>
-                                    <input type="text" id="ot-search" onkeyup="filterOvertime()" placeholder="Cari nama karyawan..." class="w-full pl-9 sm:pl-11 pr-3 py-2 sm:py-2.5 bg-gray-50 border-0 rounded-lg sm:rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-silver-400 transition-shadow shadow-inner">
+                                    <input type="text" id="ot-search" onkeyup="filterOvertime()" placeholder="Cari nama karyawan..." class="w-full pl-9 sm:pl-11 pr-3 py-2 sm:py-2.5 bg-gray-50 border-0 rounded-lg sm:rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 transition-shadow shadow-inner">
                                 </div>
                             </div>
                             
@@ -797,14 +870,19 @@
                     </div>
                 </div>
 
-                <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex justify-between items-center mb-4">
-                    <div>
-                        <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide block mb-0.5">Calculated MPP Khusus Dumping</span>
-                        <span class="text-xs text-gray-500">Berdasarkan rumus formasi</span>
+                <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex flex-col mb-4 transition-all">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wide block mb-0.5">Calculated MPP Khusus Dumping</span>
+                            <span class="text-xs text-gray-500">Berdasarkan rumus formasi</span>
+                        </div>
+                        <div class="flex items-end gap-1 text-navy-900">
+                            <span id="std-calc-mpp" class="text-3xl font-black">0</span>
+                            <span class="text-xs font-bold mb-1">Orang</span>
+                        </div>
                     </div>
-                    <div class="flex items-end gap-1 text-navy-900">
-                        <span id="std-calc-mpp" class="text-3xl font-black">0</span>
-                        <span class="text-xs font-bold mb-1">Orang</span>
+                    <div id="std-calc-details" class="mt-3 pt-3 border-t border-blue-200/60 text-[10px] text-blue-800 hidden">
+                        <!-- Rincian perhitungan akan masuk ke sini via JS -->
                     </div>
                 </div>
             </div>
@@ -897,6 +975,26 @@
             getEl('plot-week').value = weekStr;
             getEl('std-week').value = weekStr;
         });
+
+        function handleAttDeptChange(checkbox) {
+            const checked = document.querySelectorAll('.att-dept-cb:checked');
+            if (checked.length > 4) {
+                checkbox.checked = false;
+                showModal('info', 'Batas Pilihan', 'Anda maksimal hanya bisa memilih 4 unit secara bersamaan.');
+                return;
+            }
+            loadEmployeesForAttendance();
+        }
+
+        function handleOtDeptChange(checkbox) {
+            const checked = document.querySelectorAll('.ot-dept-cb:checked');
+            if (checked.length > 4) {
+                checkbox.checked = false;
+                showModal('info', 'Batas Pilihan', 'Anda maksimal hanya bisa memilih 4 unit secara bersamaan.');
+                return;
+            }
+            loadEmployeesForOvertime();
+        }
 
         function getWeekString(offsetWeeks = 0) {
             let d = new Date();
@@ -1213,29 +1311,97 @@
             loadStandard();
         }
 
+        function handlePlotDayChange(checkbox) {
+            const checkedDays = document.querySelectorAll('input[name="plot_day"]:checked');
+            if(checkedDays.length > 6) {
+                checkbox.checked = false;
+                showModal('info', 'Batas Pilihan', 'Anda maksimal hanya bisa memilih 6 hari untuk plotting formasi.');
+                return;
+            }
+            loadFormasiPlotting();
+        }
+
+        function formasiChanged() {
+            const btnSave = getEl('btn-save-formasi');
+            if (btnSave) btnSave.classList.remove('hidden');
+        }
+
         function calculateMPP(overrideDay = null) {
             const checkboxes = document.querySelectorAll('.std-line-cb:checked');
             let selectedLines = Array.from(checkboxes).map(cb => cb.value);
-            let countLines = selectedLines.length;
-            let hasLine2SCO = selectedLines.includes('LINE 2 SCO');
             
-            let checkedDays = document.querySelectorAll('input[name="std_day"]:checked');
-            let firstSelectedDay = checkedDays.length > 0 ? checkedDays[0].value : 'Senin';
-            let selectedDay = overrideDay || firstSelectedDay;
-            let isSaturday = (selectedDay === 'Sabtu');
+            const masterData = {
+                "LINE 1 SGC": { tapiokaAdonan: 1417.5, teriguSilo: 15907.5, gulaAdonanCairan: 3500 },
+                "LINE 2 SCO": { tapiokaSaur: 729, teriguSilo: 15876 },
+                "LINE 2 TYS": { tapiokaSaur: 810, teriguDough: 4050, teriguSilo: 16308, gulaMesh3020: 2160 },
+                "LINE 2 ABON": { tapiokaSaur: 968, teriguDough: 4050, teriguSilo: 25368, gulaMesh3020: 6000 },
+                "LINE 2 MCR": { tapiokaSaur: 1519, teriguDough: 2058, teriguSilo: 27489, gulaSaur: 3760 },
+                "LINE 3 CCN": { tapiokaAdonan: 5265, manualTerigu: 2960, teriguSilo: 29970, gulaAdonanCairan: 7680 },
+                "LINE 4 MCR": { tapiokaSaur: 1457, teriguDough: 1974, teriguSilo: 27489, gulaSaur: 3200 },
+                "LINE 4 CHINA": { tapiokaSaur: 1410, teriguDough: 7050, teriguSilo: 21338, gulaMesh3020: 4160 },
+                "LINE 5 RSC": { teriguSilo: 22200, gulaSaur: 950, gulaAdonanCairan: 2700 },
+                "LINE 4.2 CCN 2": { tapiokaAdonan: 1440, teriguSilo: 9065, gulaAdonanCairan: 1500 }
+            };
+
+            let totals = { tapiokaAdonan: 0, tapiokaSaur: 0, teriguDough: 0, manualTerigu: 0, teriguSilo: 0, gulaMesh3020: 0, gulaSaur: 0, gulaAdonanCairan: 0 };
             
-            let mpp = 0;
-            if (countLines === 1) mpp = 6;
-            else if (countLines === 2) mpp = 9;
-            else if (countLines === 3) mpp = 10;
-            else if (countLines === 4) { mpp = hasLine2SCO ? 10 : 12; }
-            else if (countLines === 5) { mpp = hasLine2SCO ? 13 : 14; }
-            else if (countLines === 6) { mpp = hasLine2SCO ? 15 : 16; }
-            
-            if (isSaturday) mpp -= 1;
-            if (mpp < 0) mpp = 0;
-            
+            selectedLines.forEach(line => {
+                if(masterData[line]) {
+                    for(let mat in masterData[line]) {
+                        totals[mat] += masterData[line][mat];
+                    }
+                }
+            });
+
+            let kgMin = {};
+            for(let mat in totals) {
+                kgMin[mat] = totals[mat] / 480;
+            }
+
+            let baseTapioka = (kgMin.tapiokaAdonan * 2 / 95) + (kgMin.tapiokaSaur * 2 / 40);
+            let baseTerigu = (kgMin.teriguDough * 2 / 12.5) + (kgMin.manualTerigu * 2 / 15) + (kgMin.teriguSilo * 2 / 92.5);
+            let baseGulaBawah = (kgMin.gulaMesh3020 * 2 / 45) + (kgMin.gulaSaur * 2 / 15);
+            let baseGulaAtas = (kgMin.gulaAdonanCairan * 2 / 62.5);
+
+            const applyFilter = (val) => {
+                if (val === 0) return 0;
+                if (val > 0 && val <= 2) return 2;
+                return Math.ceil(val);
+            };
+
+            let mppTapioka = applyFilter(baseTapioka);
+            let mppTerigu = applyFilter(baseTerigu);
+            let mppGulaBawah = applyFilter(baseGulaBawah);
+            let mppGulaAtas = applyFilter(baseGulaAtas);
+
+            let mpp = mppTapioka + mppTerigu + mppGulaBawah + mppGulaAtas;
+
             getEl('std-calc-mpp').innerText = mpp;
+
+            let detailsEl = getEl('std-calc-details');
+            if(detailsEl) {
+                if(selectedLines.length > 0) {
+                    detailsEl.classList.remove('hidden');
+                    let activeKgMin = [];
+                    for(let mat in kgMin) {
+                        if(kgMin[mat] > 0) activeKgMin.push(`${mat} (${kgMin[mat].toFixed(2)} Kg/Mnt)`);
+                    }
+                    
+                    let html = `
+                        <div class="mb-2"><span class="font-bold">Material Aktif:</span> ${activeKgMin.join(', ')}</div>
+                        <div class="font-bold mb-1">Rincian MPP (Setelah Filter):</div>
+                        <ul class="list-disc pl-4 space-y-0.5">
+                            <li><strong>Tapioka:</strong> Base ${baseTapioka.toFixed(2)} ➔ <strong>${mppTapioka}</strong> Org</li>
+                            <li><strong>Terigu:</strong> Base ${baseTerigu.toFixed(2)} ➔ <strong>${mppTerigu}</strong> Org</li>
+                            <li><strong>Gula Bawah:</strong> Base ${baseGulaBawah.toFixed(2)} ➔ <strong>${mppGulaBawah}</strong> Org</li>
+                            <li><strong>Gula Atas:</strong> Base ${baseGulaAtas.toFixed(2)} ➔ <strong>${mppGulaAtas}</strong> Org</li>
+                        </ul>`;
+                    detailsEl.innerHTML = html;
+                } else {
+                    detailsEl.classList.add('hidden');
+                }
+            }
+
             return { mpp, lines: selectedLines };
         }
 
@@ -1321,15 +1487,14 @@
 
         function loadFormasiPlotting() {
             let week = getEl('plot-week').value;
-            let dayRadio = document.querySelector('input[name="plot_day"]:checked');
-            let day = dayRadio ? dayRadio.value : null;
+            let checkedDays = Array.from(document.querySelectorAll('input[name="plot_day"]:checked')).map(cb => cb.value);
             let dept = getEl('plot-dept').value;
             let group = getEl('plot-group').value;
             
             const container = getEl('plot-employee-container');
             const infoCard = getEl('plot-info-card');
             
-            if(!week || !day || !dept || !group) {
+            if(!week || checkedDays.length === 0 || !dept || !group) {
                 container.classList.add('hidden');
                 infoCard.classList.add('hidden');
                 return;
@@ -1339,6 +1504,8 @@
             getEl('plot-shift-display').innerHTML = `<i class="fas fa-sync-alt mr-1 text-[9px] opacity-70"></i> ${shift}`;
             getEl('plot-shift-hidden').value = shift;
             
+            let day = checkedDays[0]; 
+
             let stdKey = `${week}_${day}_${shift}`;
             let stdData = db.standards[stdKey] || { mpp: 0, lines: [] };
             
@@ -1403,7 +1570,7 @@
                             </div>
                         </div>
                         <div class="w-full job-select-container ${isMasuk ? '' : 'hidden'} pl-1 border-l-2 border-blue-500">
-                            <select class="fmt-job-select w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-navy-900 focus:ring-1 focus:ring-blue-500 outline-none">
+                            <select class="fmt-job-select w-full p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-navy-900 focus:ring-1 focus:ring-blue-500 outline-none" onchange="formasiChanged()">
                                 ${specificJobHTML}
                             </select>
                         </div>
@@ -1417,10 +1584,17 @@
             infoCard.style.display = 'flex'; 
             updateFormasiCount();
 
-            // Sembunyikan tombol simpan jika data sudah ada di database untuk mencegah double
             const btnSave = getEl('btn-save-formasi');
             if (btnSave) {
-                if (Object.keys(savedFormasi).length > 0) {
+                let allSaved = true;
+                checkedDays.forEach(d => {
+                    let key = `${week}_${d}_${shift}_${dept}_${group}`;
+                    if (!db.formasi[key] || Object.keys(db.formasi[key]).length === 0) {
+                        allSaved = false;
+                    }
+                });
+                
+                if (allSaved && checkedDays.length > 0 && Object.keys(savedFormasi).length > 0) {
                     btnSave.classList.add('hidden');
                 } else {
                     btnSave.classList.remove('hidden');
@@ -1437,6 +1611,7 @@
                 jobContainer.classList.add('hidden');
             }
             updateFormasiCount();
+            formasiChanged();
         }
 
         function updateFormasiCount() {
@@ -1461,13 +1636,12 @@
 
         async function saveFormasi() {
             let week = getEl('plot-week').value;
-            let day = document.querySelector('input[name="plot_day"]:checked').value;
+            let checkedDays = Array.from(document.querySelectorAll('input[name="plot_day"]:checked')).map(cb => cb.value);
             let shift = getEl('plot-shift-hidden').value;
             let dept = getEl('plot-dept').value;
             let group = getEl('plot-group').value;
             
-            let formasiKey = `${week}_${day}_${shift}_${dept}_${group}`;
-            let data = {};
+            let dataTemplate = {};
             let payload = [];
             
             document.querySelectorAll('.fmt-emp-row').forEach(row => {
@@ -1477,13 +1651,20 @@
                 let status = row.querySelector('.fmt-radio:checked').value;
                 let job = row.querySelector('.fmt-job-select').value;
                 
-                data[id] = { status: status, job: job };
-                payload.push({ week: week, day: day, shift: shift, dept: dept, group: group, id: id, nama: nama, status: status, job: job });
+                dataTemplate[id] = { status: status, job: job };
+                
+                checkedDays.forEach(day => {
+                    payload.push({ week: week, day: day, shift: shift, dept: dept, group: group, id: id, nama: nama, status: status, job: job });
+                });
             });
             
             if(payload.length === 0) return showModal('info', 'Kosong', 'Tidak ada data karyawan yang dipilih.');
 
-            db.formasi[formasiKey] = data;
+            checkedDays.forEach(day => {
+                let formasiKey = `${week}_${day}_${shift}_${dept}_${group}`;
+                db.formasi[formasiKey] = JSON.parse(JSON.stringify(dataTemplate));
+            });
+            
             localStorage.setItem(FMT_CACHE_KEY, JSON.stringify(db.formasi));
             
             getEl('loading-overlay').classList.remove('hidden');
@@ -1494,8 +1675,8 @@
                 });
                 const res = await response.json();
                 if(res.status === 'success') {
-                    showModal('success', 'Formasi Disimpan', 'Plotting formasi harian berhasil disimpan ke Database.');
-                    loadFormasiPlotting(); // Reload agar tombol simpan hilang
+                    showModal('success', 'Formasi Disimpan', `Plotting formasi berhasil disimpan untuk ${checkedDays.length} hari.`);
+                    loadFormasiPlotting(); 
                 } else throw new Error(res.message);
             } catch (err) {
                 showModal('error', 'Gagal Koneksi', err.message || 'Koneksi ke database gagal.');
@@ -1506,7 +1687,11 @@
 
         function shareFormasiWhatsApp() {
             let week = getEl('plot-week').value;
-            let day = document.querySelector('input[name="plot_day"]:checked').value;
+            let checkedDays = Array.from(document.querySelectorAll('input[name="plot_day"]:checked')).map(cb => cb.value);
+            if(checkedDays.length === 0) return showModal('info', 'Pilih Hari', 'Silakan pilih minimal 1 hari terlebih dahulu.');
+            
+            let day = checkedDays[0];
+            let daysStr = checkedDays.join(', ');
             let shift = getEl('plot-shift-hidden').value;
             let dept = getEl('plot-dept').value;
             let group = getEl('plot-group').value;
@@ -1533,7 +1718,7 @@
 
             let text = `*FORMASI KERJA MINGGUAN*\n`;
             text += `📅 ${weekText}\n`;
-            text += `📍 Hari: ${day}\n`;
+            text += `📍 Hari: ${daysStr}\n`;
             text += `⏰ Shift: ${shift}\n`;
             text += `🏢 Unit: ${dept}\n`;
             text += `👥 Grup: ${group}\n\n`;
@@ -2022,14 +2207,14 @@
 
         function loadEmployeesForAttendance() {
             const date = getEl('att-date').value;
-            const dept = getEl('att-dept').value;
+            const depts = Array.from(document.querySelectorAll('.att-dept-cb:checked')).map(cb => cb.value);
             const group = getEl('att-group').value;
             const container = getEl('att-employee-list-container');
             const grid = getEl('att-checkbox-grid');
             
             if(getEl('att-search')) getEl('att-search').value = '';
             
-            if(!dept || !group || !date) {
+            if(depts.length === 0 || !group || !date) {
                 container.classList.add('hidden');
                 return;
             }
@@ -2037,11 +2222,15 @@
             getEl('att-header-actions').classList.remove('hidden');
             getEl('att-submit-container').classList.remove('hidden');
             
-            let filtered = db.employees.filter(e => e.Unit === dept && e.Grup === group && e.Status === "Aktif");
+            let filtered = db.employees.filter(e => depts.includes(e.Unit) && e.Grup === group && e.Status === "Aktif");
+            
+            // Urutkan berdasarkan Unit, lalu Nama
+            filtered.sort((a, b) => a.Unit.localeCompare(b.Unit) || a.Nama.localeCompare(b.Nama));
+
             let hasUnsaved = false;
             
             if(filtered.length === 0) {
-                grid.innerHTML = '<div class="py-6 sm:py-8 text-center text-gray-500 font-bold text-sm">Tidak ada karyawan di kriteria ini.</div>';
+                grid.innerHTML = '<div class="py-6 sm:py-8 text-center text-gray-500 font-bold text-sm">Tidak ada karyawan aktif di kriteria ini.</div>';
             } else {
                 let html = '';
                 filtered.forEach(e => {
@@ -2070,11 +2259,12 @@
                     const badge = isSaved ? `<div class="mt-1 text-[10px] text-green-600 font-bold"><i class="fas fa-check-circle"></i> Tersimpan (${savedData.Status})</div>` : '';
 
                     html += `
-                    <div class="att-emp-card ${cardStyle} rounded-xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2 transition-shadow" data-nama="${e["Nama"]}">
+                    <div class="att-emp-card ${cardStyle} rounded-xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2 transition-shadow" data-nama="${e["Nama"]}" data-unit="${e["Unit"]}">
                         <div>
                             <div class="font-extrabold text-navy-900 text-sm sm:text-base">${e["Nama"]}</div>
-                            <div class="flex flex-wrap gap-2 mt-0.5">
+                            <div class="flex flex-wrap gap-2 mt-0.5 items-center">
                                 <div class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold">ID: ${id}</div>
+                                <div class="text-[9px] sm:text-[10px] text-indigo-600 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded font-bold">${e["Unit"]}</div>
                             </div>
                             ${badge}
                         </div>
@@ -2168,14 +2358,16 @@
 
         function shareWhatsAppAttendance() {
             const date = getEl('att-date').value;
-            const dept = getEl('att-dept').value;
+            const depts = Array.from(document.querySelectorAll('.att-dept-cb:checked')).map(cb => cb.value);
             const group = getEl('att-group').value;
             
-            if(!date || !dept || !group) {
+            if(!date || depts.length === 0 || !group) {
                 return showModal('info', 'Data Belum Lengkap', 'Pilih Tanggal, Unit, dan Grup terlebih dahulu sebelum membagikan data.');
             }
 
-            const savedData = db.attendance.filter(a => isSameDate(a.Tanggal, date) && a.Unit === dept && a.Grup === group);
+            const savedData = db.attendance.filter(a => isSameDate(a.Tanggal, date) && depts.includes(a.Unit) && a.Grup === group);
+            savedData.sort((a, b) => a.Unit.localeCompare(b.Unit) || a.Nama.localeCompare(b.Nama));
+
             if(savedData.length === 0) {
                 return showModal('info', 'Tidak Ada Data Tersimpan', 'Belum ada data kehadiran yang tersimpan di sistem untuk pencarian ini.');
             }
@@ -2185,7 +2377,7 @@
 
             let text = `*DAFTAR KEHADIRAN HARIAN*\n`;
             text += `Tanggal: ${formattedDate}\n`;
-            text += `Unit: ${dept}\n`;
+            text += `Unit: ${depts.join(', ')}\n`;
             text += `Grup: ${group}\n`;
             text += `\n*Rincian Kehadiran:*\n`;
 
@@ -2197,7 +2389,7 @@
                 else if(p.Status === "CUTI") statusEmoji = "🏖️";
                 else if(p.Status === "OFF") statusEmoji = "📴";
 
-                text += `${index + 1}. ${p["Employee ID"]} - ${p.Nama} : *${p.Status}* ${statusEmoji}\n`;
+                text += `${index + 1}. ${p["Employee ID"]} - ${p.Nama} [${p.Unit}] : *${p.Status}* ${statusEmoji}\n`;
             });
 
             const encodedText = encodeURIComponent(text);
@@ -2206,7 +2398,6 @@
 
         async function submitAttendance() {
             const date = getEl('att-date').value;
-            const dept = getEl('att-dept').value;
             const group = getEl('att-group').value;
             if(!date) return showModal('info', 'Tanggal Kosong', 'Harap lengkapi tanggal kehadiran.');
             
@@ -2218,6 +2409,7 @@
                 if(radios.length > 0) {
                     const id = radios[0].name.split('_')[1];
                     const nama = card.getAttribute('data-nama');
+                    const unit = card.getAttribute('data-unit');
                     const checked = card.querySelector(`input[name="st_${id}"]:checked:not(:disabled)`);
                     
                     if(checked) {
@@ -2226,7 +2418,7 @@
                         if (isAlreadySaved) {
                             duplicateNames.push(nama); 
                         } else {
-                            payloadData.push({ tanggal: date, id: id, nama: nama, dept: dept, grup: group, status: checked.value });
+                            payloadData.push({ tanggal: date, id: id, nama: nama, dept: unit, grup: group, status: checked.value });
                         }
                     }
                 }
@@ -2274,23 +2466,25 @@
 
         function loadEmployeesForOvertime() {
             const date = getEl('ot-date').value;
-            const dept = getEl('ot-dept').value;
+            const depts = Array.from(document.querySelectorAll('.ot-dept-cb:checked')).map(cb => cb.value);
             const group = getEl('ot-group').value;
             const container = getEl('ot-employee-list-container');
             const grid = getEl('ot-checkbox-grid');
             
             if(getEl('ot-search')) getEl('ot-search').value = '';
             
-            if(!dept || !group || !date) {
+            if(depts.length === 0 || !group || !date) {
                 container.classList.add('hidden');
                 return;
             }
             
-            let filtered = db.employees.filter(e => e.Unit === dept && e.Grup === group && e.Status === "Aktif");
+            let filtered = db.employees.filter(e => depts.includes(e.Unit) && e.Grup === group && e.Status === "Aktif");
+            filtered.sort((a, b) => a.Unit.localeCompare(b.Unit) || a.Nama.localeCompare(b.Nama));
+            
             let hasUnsaved = false;
             
             if(filtered.length === 0) {
-                grid.innerHTML = '<div class="col-span-full py-6 sm:py-8 text-center text-gray-500 font-bold text-sm">Tidak ada karyawan di kriteria ini.</div>';
+                grid.innerHTML = '<div class="col-span-full py-6 sm:py-8 text-center text-gray-500 font-bold text-sm">Tidak ada karyawan aktif di kriteria ini.</div>';
             } else {
                 let html = '';
                 filtered.forEach(e => {
@@ -2307,11 +2501,12 @@
 
                     html += `
                         <label class="ot-emp-label flex items-center p-3 sm:p-4 border border-gray-100 rounded-xl sm:rounded-2xl transition-all shadow-sm ${pointerClass}">
-                            <input type="checkbox" value="${id}" data-nama="${e["Nama"]}" class="ot-emp-check w-5 h-5 sm:w-6 sm:h-6 text-silver-500 border-gray-300 rounded focus:ring-silver-400 mr-3 sm:mr-4 ${isSaved ? 'bg-gray-200' : 'bg-gray-50'}" onchange="checkOvertimeSelection()" ${disabledAttr}>
+                            <input type="checkbox" value="${id}" data-nama="${e["Nama"]}" data-unit="${e["Unit"]}" class="ot-emp-check w-5 h-5 sm:w-6 sm:h-6 text-silver-500 border-gray-300 rounded focus:ring-silver-400 mr-3 sm:mr-4 ${isSaved ? 'bg-gray-200' : 'bg-gray-50'}" onchange="checkOvertimeSelection()" ${disabledAttr}>
                             <div class="flex flex-col">
                                 <span class="font-extrabold text-navy-900 text-xs sm:text-sm">${e["Nama"]}</span>
                                 <div class="flex flex-wrap items-center gap-2 mt-0.5">
                                     <span class="text-[10px] sm:text-xs text-gray-400 font-mono font-semibold">ID: ${id}</span>
+                                    <span class="text-[9px] sm:text-[10px] text-indigo-600 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded font-bold">${e["Unit"]}</span>
                                 </div>
                             </div>
                             ${badge}
@@ -2361,14 +2556,16 @@
         
         function shareWhatsApp() {
             const date = getEl('ot-date').value;
-            const dept = getEl('ot-dept').value;
+            const depts = Array.from(document.querySelectorAll('.ot-dept-cb:checked')).map(cb => cb.value);
             const group = getEl('ot-group').value;
             
-            if(!date || !dept || !group) {
+            if(!date || depts.length === 0 || !group) {
                 return showModal('info', 'Data Belum Lengkap', 'Pilih Tanggal, Unit, dan Grup terlebih dahulu sebelum membagikan.');
             }
 
-            const savedData = db.overtime.filter(o => isSameDate(o.Tanggal, date) && o.Unit === dept && o.Grup === group);
+            const savedData = db.overtime.filter(o => isSameDate(o.Tanggal, date) && depts.includes(o.Unit) && o.Grup === group);
+            savedData.sort((a, b) => a.Unit.localeCompare(b.Unit) || a.Nama.localeCompare(b.Nama));
+            
             if(savedData.length === 0) return showModal('info', 'Tidak Ada Data Tersimpan', 'Belum ada data lembur yang tersimpan untuk filter ini.');
 
             const dateObj = new Date(date);
@@ -2376,12 +2573,12 @@
 
             let text = `*DAFTAR LEMBUR KARYAWAN*\n`;
             text += `Tanggal: ${formattedDate}\n`;
-            text += `Unit: ${dept}\n`;
+            text += `Unit: ${depts.join(', ')}\n`;
             text += `Grup: ${group}\n`;
             text += `\n*Rincian Lembur:*\n`;
 
             savedData.forEach((o, index) => {
-                text += `${index + 1}. ${o["Employee ID"]} - ${o.Nama} (*${o["Jam Lembur"]} Jam*)\n    Ket: ${o.Keterangan}\n`;
+                text += `${index + 1}. ${o["Employee ID"]} - ${o.Nama} [${o.Unit}] (*${o["Jam Lembur"]} Jam*)\n    Ket: ${o.Keterangan}\n`;
             });
 
             const encodedText = encodeURIComponent(text);
@@ -2390,7 +2587,6 @@
 
         async function submitOvertime() {
             const date = getEl('ot-date').value;
-            const dept = getEl('ot-dept').value;
             const group = getEl('ot-group').value;
             const hours = getEl('ot-hours').value;
             const remarks = getEl('ot-remarks').value;
@@ -2406,6 +2602,7 @@
             checks.forEach(chk => {
                 const empId = chk.value;
                 const empName = chk.getAttribute('data-nama');
+                const unit = chk.getAttribute('data-unit');
                 
                 const isAlreadySaved = db.overtime.some(o => isSameDate(o.Tanggal, date) && String(o["Employee ID"]).trim() === String(empId).trim());
 
@@ -2414,7 +2611,7 @@
                 } else {
                     payloadData.push({
                         tanggal: date, id: empId, nama: empName,
-                        dept: dept, grup: group, jamLembur: parseFloat(hours), keterangan: remarks
+                        dept: unit, grup: group, jamLembur: parseFloat(hours), keterangan: remarks
                     });
                 }
             });
