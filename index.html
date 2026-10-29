@@ -147,8 +147,11 @@
             <button onclick="navigate('attendance')" id="nav-attendance" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-xl text-left mb-2">
                 <i class="fas fa-calendar-check w-8 text-lg"></i> Kehadiran Harian
             </button>
-            <button onclick="navigate('overtime')" id="nav-overtime" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-xl text-left">
+            <button onclick="navigate('overtime')" id="nav-overtime" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-xl text-left mb-2">
                 <i class="fas fa-clock w-8 text-lg"></i> Lembur Karyawan
+            </button>
+            <button onclick="navigate('standard-mpp')" id="nav-standard-mpp" class="sidebar-item w-full flex items-center px-4 py-3 text-sm rounded-xl text-left">
+                <i class="fas fa-calculator w-8 text-lg"></i> Standard MPP
             </button>
             
             <p class="px-4 text-[10px] font-bold text-navy-100 uppercase tracking-[0.2em] mt-6 mb-3 opacity-50">Analytics</p>
@@ -196,6 +199,7 @@
 
         <div class="flex-1 overflow-y-auto px-3 sm:px-4 md:px-8 pb-24 custom-scrollbar">
             
+            <!-- Dashboard View -->
             <div id="view-dashboard" class="space-y-4 max-w-7xl mx-auto">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100">
                     <div class="flex items-center gap-2 text-navy-900 font-bold text-sm sm:text-base">
@@ -263,6 +267,7 @@
                 </div>
             </div>
 
+            <!-- Formasi View -->
             <div id="view-formasi" class="hidden space-y-4 max-w-6xl mx-auto">
                 <div class="bg-white rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100 overflow-hidden">
                     <div class="p-3 sm:p-4 bg-gradient-to-r from-navy-900 to-navy-800 text-white flex justify-between items-center">
@@ -374,6 +379,7 @@
                 </div>
             </div>
 
+            <!-- Attendance View -->
             <div id="view-attendance" class="hidden space-y-4 max-w-6xl mx-auto">
                 <div class="bg-white rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100 overflow-hidden">
                     <div class="p-3 sm:p-4 bg-gradient-to-r from-navy-900 to-navy-800 text-white">
@@ -482,6 +488,7 @@
                 </div>
             </div>
 
+            <!-- Overtime View -->
             <div id="view-overtime" class="hidden space-y-4 max-w-6xl mx-auto">
                 <div class="bg-white rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100 overflow-hidden">
                     <div class="p-3 sm:p-4 bg-gradient-to-r from-navy-900 to-navy-800 text-white">
@@ -495,7 +502,7 @@
                     </div>
                     <div class="p-4 sm:p-6">
                         <div class="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-5 bg-gray-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-100 shadow-inner">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                                 <div>
                                     <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Tanggal</label>
                                     <input type="date" id="ot-date" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all" onchange="loadEmployeesForOvertime()">
@@ -507,6 +514,16 @@
                                         <option value="Grup A">Grup A</option>
                                         <option value="Grup B">Grup B</option>
                                         <option value="Grup C">Grup C</option>
+                                        <option value="NON SHIFT">NON SHIFT</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 sm:mb-2">Shift</label>
+                                    <select id="ot-shift" class="w-full p-2.5 sm:p-3 bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-xs sm:text-sm shadow-sm transition-all cursor-pointer font-bold text-navy-900">
+                                        <option value="">-- Pilih Shift --</option>
+                                        <option value="Shift 1">Shift 1</option>
+                                        <option value="Shift 2">Shift 2</option>
+                                        <option value="Shift 3">Shift 3</option>
                                         <option value="NON SHIFT">NON SHIFT</option>
                                     </select>
                                 </div>
@@ -604,6 +621,47 @@
                 </div>
             </div>
 
+            <!-- Standard MPP Calculator View -->
+            <div id="view-standard-mpp" class="hidden space-y-4 max-w-6xl mx-auto">
+                <div class="bg-white rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100 overflow-hidden">
+                    <div class="p-3 sm:p-4 bg-gradient-to-r from-navy-900 to-navy-800 text-white flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/10 flex items-center justify-center text-sm sm:text-base backdrop-blur-sm"><i class="fas fa-calculator text-silver-400"></i></div>
+                            <div>
+                                <h3 class="text-sm sm:text-base font-bold leading-tight">Standard MPP Dumping</h3>
+                                <p class="text-[10px] sm:text-xs text-navy-100 opacity-80">Kalkulator standar man power</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-4 sm:p-6">
+                        <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-5 shadow-inner">
+                            <label class="block text-xs font-bold text-navy-900 mb-3 border-b border-gray-200 pb-2 uppercase tracking-wide">Pilih Line yang Jalan (Maksimal 6 Line)</label>
+                            <div id="calc-lines-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <!-- Kalkulator Lines di-render via JS -->
+                            </div>
+                        </div>
+
+                        <div class="p-5 sm:p-6 bg-blue-50 border border-blue-100 rounded-xl flex flex-col mb-4 transition-all shadow-sm">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div>
+                                    <span class="text-sm font-extrabold text-blue-600 uppercase tracking-wide block mb-1">Hasil Kalkulasi MPP</span>
+                                    <span class="text-xs text-gray-500 font-semibold">Berdasarkan rumus formasi standar</span>
+                                </div>
+                                <div class="flex items-end gap-2 text-navy-900 bg-white px-5 py-3 rounded-xl shadow-sm border border-blue-100">
+                                    <span id="calc-mpp-total" class="text-4xl font-black text-blue-600">0</span>
+                                    <span class="text-sm font-bold mb-1 text-gray-500">Orang</span>
+                                </div>
+                            </div>
+                            <div id="calc-mpp-details" class="mt-5 pt-5 border-t border-blue-200/60 hidden">
+                                <!-- Rincian output di sini -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lihat Formasi View -->
             <div id="view-lihat-formasi" class="hidden space-y-4 max-w-7xl mx-auto">
                 <div class="bg-white rounded-2xl sm:rounded-3xl shadow-soft border border-gray-100 overflow-hidden">
                     <div class="p-4 sm:p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -677,6 +735,7 @@
                 </div>
             </div>
 
+            <!-- Reports View -->
             <div id="view-reports" class="hidden space-y-4 max-w-7xl mx-auto">
                 <div class="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl shadow-soft border border-gray-100">
                     <h3 class="text-base font-bold text-navy-900 mb-4 flex items-center">
@@ -970,6 +1029,7 @@
             generatePeriodeOptions();
             generateWeekOptions(); 
             preloadDataSilently(); 
+            renderCalcLinesGrid(); 
             
             let weekStr = getWeekString(0);
             getEl('plot-week').value = weekStr;
@@ -1180,7 +1240,7 @@
         }
 
         function navigate(page) {
-            ['dashboard', 'attendance', 'overtime', 'reports', 'formasi', 'lihat-formasi'].forEach(v => {
+            ['dashboard', 'attendance', 'overtime', 'reports', 'formasi', 'lihat-formasi', 'standard-mpp'].forEach(v => {
                 const view = getEl(`view-${v}`);
                 const nav = getEl(`nav-${v}`);
                 if(view) view.classList.add('hidden');
@@ -1196,9 +1256,10 @@
                 'dashboard': 'Executive Dashboard',
                 'formasi': 'Formasi Mingguan',
                 'lihat-formasi': 'Lihat Jadwal Formasi',
-                'attendance': 'Input Kehadiran',
-                'overtime': 'Input Lembur',
-                'reports': 'Pusat Laporan & Analisis'
+                'attendance': 'Input Kehadiran Harian',
+                'overtime': 'Input Data Lembur',
+                'reports': 'Pusat Laporan & Analisis',
+                'standard-mpp': 'Kalkulator Standard MPP'
             };
             getEl('page-title').innerText = titles[page] || '';
             
@@ -1290,6 +1351,28 @@
                 </label>
             `).join('');
         }
+        
+        function renderCalcLinesGrid() {
+            const container = getEl('calc-lines-grid');
+            if(container) {
+                container.innerHTML = linesList.map((line) => `
+                    <label class="flex items-center p-3.5 border border-gray-200 rounded-xl bg-white cursor-pointer hover:bg-gray-50 transition-colors shadow-sm">
+                        <input type="checkbox" value="${line}" class="calc-line-cb w-5 h-5 text-blue-600 focus:ring-blue-600 border-gray-300 rounded mr-3" onchange="handleCalcLineSelection(this)">
+                        <span class="text-xs sm:text-sm font-bold text-gray-700">${line}</span>
+                    </label>
+                `).join('');
+            }
+        }
+
+        function handleCalcLineSelection(checkbox) {
+            const checkedLines = document.querySelectorAll('.calc-line-cb:checked');
+            if(checkedLines.length > 6) {
+                checkbox.checked = false;
+                showModal('info', 'Maksimal Line', 'Hanya dapat mengatur maksimal 6 line aktif secara bersamaan.');
+                return;
+            }
+            calculateMPPStandalone();
+        }
 
         function handleLineSelection(checkbox) {
             const checkedLines = document.querySelectorAll('.std-line-cb:checked');
@@ -1326,7 +1409,7 @@
             if (btnSave) btnSave.classList.remove('hidden');
         }
 
-        function calculateMPP(overrideDay = null) {
+        function calculateMPP() {
             const checkboxes = document.querySelectorAll('.std-line-cb:checked');
             let selectedLines = Array.from(checkboxes).map(cb => cb.value);
             
@@ -1365,8 +1448,8 @@
 
             const applyFilter = (val) => {
                 if (val === 0) return 0;
-                if (val > 0 && val <= 2) return 2;
-                return Math.ceil(val);
+                if (val < 2) return 2;
+                return Math.round(val);
             };
 
             let mppTapioka = applyFilter(baseTapioka);
@@ -1403,6 +1486,95 @@
             }
 
             return { mpp, lines: selectedLines };
+        }
+        
+        function calculateMPPStandalone() {
+            const checkboxes = document.querySelectorAll('.calc-line-cb:checked');
+            let selectedLines = Array.from(checkboxes).map(cb => cb.value);
+            
+            const masterData = {
+                "LINE 1 SGC": { tapiokaAdonan: 1417.5, teriguSilo: 15907.5, gulaAdonanCairan: 3500 },
+                "LINE 2 SCO": { tapiokaSaur: 729, teriguSilo: 15876 },
+                "LINE 2 TYS": { tapiokaSaur: 810, teriguDough: 4050, teriguSilo: 16308, gulaMesh3020: 2160 },
+                "LINE 2 ABON": { tapiokaSaur: 968, teriguDough: 4050, teriguSilo: 25368, gulaMesh3020: 6000 },
+                "LINE 2 MCR": { tapiokaSaur: 1519, teriguDough: 2058, teriguSilo: 27489, gulaSaur: 3760 },
+                "LINE 3 CCN": { tapiokaAdonan: 5265, manualTerigu: 2960, teriguSilo: 29970, gulaAdonanCairan: 7680 },
+                "LINE 4 MCR": { tapiokaSaur: 1457, teriguDough: 1974, teriguSilo: 27489, gulaSaur: 3200 },
+                "LINE 4 CHINA": { tapiokaSaur: 1410, teriguDough: 7050, teriguSilo: 21338, gulaMesh3020: 4160 },
+                "LINE 5 RSC": { teriguSilo: 22200, gulaSaur: 950, gulaAdonanCairan: 2700 },
+                "LINE 4.2 CCN 2": { tapiokaAdonan: 1440, teriguSilo: 9065, gulaAdonanCairan: 1500 }
+            };
+
+            let totals = { tapiokaAdonan: 0, tapiokaSaur: 0, teriguDough: 0, manualTerigu: 0, teriguSilo: 0, gulaMesh3020: 0, gulaSaur: 0, gulaAdonanCairan: 0 };
+            
+            selectedLines.forEach(line => {
+                if(masterData[line]) {
+                    for(let mat in masterData[line]) {
+                        totals[mat] += masterData[line][mat];
+                    }
+                }
+            });
+
+            let kgMin = {};
+            for(let mat in totals) {
+                kgMin[mat] = totals[mat] / 480;
+            }
+
+            let baseTapioka = (kgMin.tapiokaAdonan * 2 / 95) + (kgMin.tapiokaSaur * 2 / 40);
+            let baseTerigu = (kgMin.teriguDough * 2 / 12.5) + (kgMin.manualTerigu * 2 / 15) + (kgMin.teriguSilo * 2 / 92.5);
+            let baseGulaBawah = (kgMin.gulaMesh3020 * 2 / 45) + (kgMin.gulaSaur * 2 / 15);
+            let baseGulaAtas = (kgMin.gulaAdonanCairan * 2 / 62.5);
+
+            const applyFilter = (val) => {
+                if (val === 0) return 0;
+                if (val < 2) return 2;
+                return Math.round(val);
+            };
+
+            let mppTapioka = applyFilter(baseTapioka);
+            let mppTerigu = applyFilter(baseTerigu);
+            let mppGulaBawah = applyFilter(baseGulaBawah);
+            let mppGulaAtas = applyFilter(baseGulaAtas);
+
+            let mpp = mppTapioka + mppTerigu + mppGulaBawah + mppGulaAtas;
+
+            getEl('calc-mpp-total').innerText = mpp;
+
+            let detailsEl = getEl('calc-mpp-details');
+            if(detailsEl) {
+                if(selectedLines.length > 0) {
+                    detailsEl.classList.remove('hidden');
+                    let activeKgMin = [];
+                    for(let mat in kgMin) {
+                        if(kgMin[mat] > 0) activeKgMin.push(`${mat} (${kgMin[mat].toFixed(2)} Kg/Mnt)`);
+                    }
+                    
+                    let html = `
+                        <div class="mb-3 text-xs"><span class="font-bold text-gray-700">Material Aktif:</span> ${activeKgMin.join(', ')}</div>
+                        <div class="font-bold mb-2 text-sm text-blue-700">Rincian Formasi Target:</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                            <div class="bg-white p-3 rounded-xl border border-blue-100 flex justify-between items-center shadow-sm">
+                                <span class="font-semibold text-gray-600 text-xs sm:text-sm">Tapioka <span class="text-[10px] text-gray-400 block sm:inline">(Base ${baseTapioka.toFixed(2)})</span></span>
+                                <span class="font-black text-blue-700 text-xl sm:text-2xl">${mppTapioka} <span class="text-xs font-bold text-gray-500">Org</span></span>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-blue-100 flex justify-between items-center shadow-sm">
+                                <span class="font-semibold text-gray-600 text-xs sm:text-sm">Terigu <span class="text-[10px] text-gray-400 block sm:inline">(Base ${baseTerigu.toFixed(2)})</span></span>
+                                <span class="font-black text-blue-700 text-xl sm:text-2xl">${mppTerigu} <span class="text-xs font-bold text-gray-500">Org</span></span>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-blue-100 flex justify-between items-center shadow-sm">
+                                <span class="font-semibold text-gray-600 text-xs sm:text-sm">Gula Bawah <span class="text-[10px] text-gray-400 block sm:inline">(Base ${baseGulaBawah.toFixed(2)})</span></span>
+                                <span class="font-black text-blue-700 text-xl sm:text-2xl">${mppGulaBawah} <span class="text-xs font-bold text-gray-500">Org</span></span>
+                            </div>
+                            <div class="bg-white p-3 rounded-xl border border-blue-100 flex justify-between items-center shadow-sm">
+                                <span class="font-semibold text-gray-600 text-xs sm:text-sm">Gula Atas <span class="text-[10px] text-gray-400 block sm:inline">(Base ${baseGulaAtas.toFixed(2)})</span></span>
+                                <span class="font-black text-blue-700 text-xl sm:text-2xl">${mppGulaAtas} <span class="text-xs font-bold text-gray-500">Org</span></span>
+                            </div>
+                        </div>`;
+                    detailsEl.innerHTML = html;
+                } else {
+                    detailsEl.classList.add('hidden');
+                }
+            }
         }
 
         function loadStandard() {
@@ -2054,7 +2226,7 @@
                         listHTML += `
                         <li class="flex flex-col p-3.5 border border-gray-100 rounded-xl hover:bg-gray-50 hover:border-gray-200 transition-all shadow-sm mb-2">
                             <div class="flex justify-between items-center mb-2">
-                                <div class="text-xs sm:text-sm font-bold text-navy-900">${dateStr}</div>
+                                <div class="text-xs sm:text-sm font-bold text-navy-900">${dateStr} <span class="ml-2 px-2 py-0.5 text-[9px] bg-blue-100 text-blue-700 rounded-md font-bold">${o.Shift || '-'}</span></div>
                                 <div class="px-3 py-1 rounded-lg text-[10px] sm:text-xs font-black text-navy-900 bg-silver-100 border border-silver-200">${o["Jam Lembur"]} Jam</div>
                             </div>
                             <div class="text-[10px] sm:text-xs text-gray-500 flex items-start gap-2 bg-white p-2 rounded-lg border border-gray-50">
@@ -2558,6 +2730,7 @@
             const date = getEl('ot-date').value;
             const depts = Array.from(document.querySelectorAll('.ot-dept-cb:checked')).map(cb => cb.value);
             const group = getEl('ot-group').value;
+            const shift = getEl('ot-shift').value;
             
             if(!date || depts.length === 0 || !group) {
                 return showModal('info', 'Data Belum Lengkap', 'Pilih Tanggal, Unit, dan Grup terlebih dahulu sebelum membagikan.');
@@ -2575,10 +2748,12 @@
             text += `Tanggal: ${formattedDate}\n`;
             text += `Unit: ${depts.join(', ')}\n`;
             text += `Grup: ${group}\n`;
+            if (shift) text += `Shift: ${shift}\n`;
             text += `\n*Rincian Lembur:*\n`;
 
             savedData.forEach((o, index) => {
-                text += `${index + 1}. ${o["Employee ID"]} - ${o.Nama} [${o.Unit}] (*${o["Jam Lembur"]} Jam*)\n    Ket: ${o.Keterangan}\n`;
+                let shiftText = o.Shift ? ` [${o.Shift}]` : '';
+                text += `${index + 1}. ${o["Employee ID"]} - ${o.Nama} [${o.Unit}]${shiftText} (*${o["Jam Lembur"]} Jam*)\n    Ket: ${o.Keterangan}\n`;
             });
 
             const encodedText = encodeURIComponent(text);
@@ -2588,10 +2763,11 @@
         async function submitOvertime() {
             const date = getEl('ot-date').value;
             const group = getEl('ot-group').value;
+            const shift = getEl('ot-shift').value;
             const hours = getEl('ot-hours').value;
             const remarks = getEl('ot-remarks').value;
             
-            if(!date || !remarks) return showModal('info', 'Form Tidak Lengkap', 'Pastikan Tanggal dan Keterangan Pekerjaan sudah diisi.');
+            if(!date || !remarks || !shift) return showModal('info', 'Form Tidak Lengkap', 'Pastikan Tanggal, Shift, dan Keterangan Pekerjaan sudah diisi.');
             
             const checks = document.querySelectorAll('.ot-emp-check:checked:not(:disabled)');
             if(checks.length === 0) return showModal('info', 'Karyawan Kosong', 'Pilih setidaknya satu karyawan baru untuk dilemburkan.');
@@ -2611,7 +2787,7 @@
                 } else {
                     payloadData.push({
                         tanggal: date, id: empId, nama: empName,
-                        dept: unit, grup: group, jamLembur: parseFloat(hours), keterangan: remarks
+                        dept: unit, grup: group, shift: shift, jamLembur: parseFloat(hours), keterangan: remarks
                     });
                 }
             });
@@ -2638,7 +2814,7 @@
                 });
                 const res = await response.json();
                 if(res.status === 'success') {
-                    payloadData.forEach(p => db.overtime.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Unit": p.dept, "Grup": p.grup, "Jam Lembur": p.jamLembur, "Keterangan": p.keterangan}));
+                    payloadData.forEach(p => db.overtime.push({"Tanggal": p.tanggal, "Employee ID": p.id, "Nama": p.nama, "Unit": p.dept, "Grup": p.grup, "Shift": p.shift, "Jam Lembur": p.jamLembur, "Keterangan": p.keterangan}));
                     localStorage.setItem(CACHE_KEY, JSON.stringify(db));
                     
                     getEl('ot-remarks').value = '';
